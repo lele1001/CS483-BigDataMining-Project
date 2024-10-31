@@ -1,0 +1,6 @@
+Diabetes Distribution within Each Cluster:
+Diabetes_012     0.0   1.0    2.0
+Cluster                          
+0              10724   252   1393
+1              41900  2003  19802
+2             161079  2376  14151
