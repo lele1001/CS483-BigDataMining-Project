@@ -76,6 +76,18 @@ def traditional_clustering(data, features, features_scaled, k):
     features_2d = pca.fit_transform(features_scaled)
     generate_pca_plot(data, features_2d, k)
 
+    # Generate histograms for each feature
+    for feature in features.columns:
+        plt.figure(figsize=(10, 6))
+        sns.histplot(data=data, x=feature, hue=data['Cluster'], multiple='dodge', kde=True, bins=20, palette="viridis", alpha=0.7)
+        plt.title(f'Feature Distribution by Cluster: {feature}')
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.legend(labels=[f'Cluster {i}' for i in range(k)], title='Cluster', loc='upper center')
+        plt.tight_layout()
+        plt.savefig(f"./graphs/{feature}_cluster_histogram.png")
+        plt.close()
+
 def stratified_kmeans(data_scaled):
     # Step 1: Segment data by diabetes status
     no_diabetes = data_scaled[data_scaled['Diabetes_012'] == 0]
