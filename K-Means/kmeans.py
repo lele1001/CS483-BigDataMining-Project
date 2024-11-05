@@ -21,7 +21,7 @@ def clean_directory(directory):
 
 def generate_pca_plot(data, features_2d, k):
     plt.figure(figsize=(10, 7))
-    sns.scatterplot(x=features_2d[:, 0], y=features_2d[:, 1], hue=data['Cluster'], palette='viridis', alpha=0.6)
+    sns.scatterplot(x=features_2d[:, 0], y=features_2d[:, 1], hue=data['Cluster'])
     plt.title('Clusters of Health Profiles in 2D PCA Space')
     plt.xlabel(f'PCA Component 1: {features_2d[:, 0].var():.2f}')
     plt.ylabel(f'PCA Component 2: {features_2d[:, 1].var():.2f}')
@@ -61,7 +61,7 @@ def traditional_clustering(data, features, features_scaled, k):
 
     # Profile Each Cluster by calculating the average of each feature within each cluster
     cluster_profiles = data.groupby('Cluster').mean()
-    generate_plot(cluster_profiles, "Cluster Profiles (Mean Feature Values)", "Health Indicators", "Average Value", "./graphs/cluster_profiles.png")
+    generate_plot(cluster_profiles, "Cluster Profiles (Mean Feature Values)", "Health Indicators", "Average Value", "./graphs/cluster_profiles.png", 8)
     save_results(cluster_profiles, "Cluster Profiles (Mean Feature Values)", "./results/cluster_profiles.txt")
 
     # Analyze Cluster Composition in Terms of Diabetes Status
