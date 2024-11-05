@@ -19,41 +19,37 @@ def clean_directory(directory):
             os.remove(f"{directory}/{file}")
 
 
-def generate_plots(data, features, features_2d, k):
+def generate_pca_plot(data, features_2d, k):
     plt.figure(figsize=(10, 7))
     sns.scatterplot(x=features_2d[:, 0], y=features_2d[:, 1], hue=data['Cluster'], palette='viridis', alpha=0.6)
     plt.title('Clusters of Health Profiles in 2D PCA Space')
-    plt.xlabel('PCA Component 1')
-    plt.ylabel('PCA Component 2')
+    plt.xlabel(f'PCA Component 1: {features_2d[:, 0].var():.2f}')
+    plt.ylabel(f'PCA Component 2: {features_2d[:, 1].var():.2f}')
     plt.legend(labels=[f'Cluster {i}' for i in range(k)], title='Cluster')
     plt.savefig("./graphs/cluster_visualization.png")
     plt.close()
 
-    # Save each feature's histogram in clusters for better understanding
-    for feature in features.columns:
-        plt.figure(figsize=(10, 6))
-        sns.histplot(data=data, x=feature, hue=data['Cluster'], multiple='dodge', kde=True, bins=20, palette="viridis", alpha=0.7)
-        plt.title(f'Feature Distribution by Cluster: {feature}')
-        plt.xlabel('Value')
-        plt.ylabel('Frequency')
-        plt.legend(labels=[f'Cluster {i}' for i in range(k)], title='Cluster', loc='upper center')
-        plt.tight_layout()
-        plt.savefig(f"./graphs/{feature}_cluster_histogram.png")
-        plt.close()
 
-def save_results(data, cluster_profiles, diabetes_distribution):
+def generate_plot(profiles, title, xlabel, ylabel, save_path, ncol=5, figsize=(14, 10)):
+    profiles.plot(kind='bar', figsize=figsize)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    
+    plt.legend(title='Legend', loc='upper center', ncol=ncol)
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+
+
+def save_results(profiles, title, path):
     if not os.path.exists("./results"):
         os.makedirs("./results")
 
-    with open("./results/cluster_profiles.txt", "w") as file:
-        file.write("Cluster Profiles (Mean Feature Values):\n")
-        file.write(cluster_profiles.to_string())
-
-    with open("./results/diabetes_distribution.txt", "w") as file:
-        file.write("Diabetes Distribution within Each Cluster:\n")
-        file.write(diabetes_distribution.to_string())
-
-    data.to_csv("./results/data_with_clusters.csv", index=False)
+    with open(path, "w") as file:
+        file.write(f"{title}:\n")
+        file.write(profiles.to_string())
 
 
 def traditional_clustering(data, features, features_scaled, k):
@@ -65,24 +61,22 @@ def traditional_clustering(data, features, features_scaled, k):
 
     # Profile Each Cluster by calculating the average of each feature within each cluster
     cluster_profiles = data.groupby('Cluster').mean()
-    print("\nCluster Profiles (Mean Feature Values):")
-    print(cluster_profiles)
+    generate_plot(cluster_profiles, "Cluster Profiles (Mean Feature Values)", "Health Indicators", "Average Value", "./graphs/cluster_profiles.png")
+    save_results(cluster_profiles, "Cluster Profiles (Mean Feature Values)", "./results/cluster_profiles.txt")
 
     # Analyze Cluster Composition in Terms of Diabetes Status
     diabetes_distribution = data.groupby(['Cluster', 'Diabetes_012']).size().unstack(fill_value=0)
-    print("\nDiabetes Distribution within Each Cluster:")
-    print(diabetes_distribution)
+    diabetes_distribution = diabetes_distribution.div(diabetes_distribution.sum(axis=1), axis=0)
+
+    generate_plot(diabetes_distribution, "Cluster Composition by Diabetes Status", "Cluster", "Percentage", "./graphs/cluster_composition_by_diabetes_status.png")
+    save_results(diabetes_distribution, "Cluster Composition by Diabetes Status", "./results/cluster_composition_by_diabetes_status.txt")
 
     # Visualize Clusters in 2D Space Using PCA
     pca = PCA(n_components=2)
     features_2d = pca.fit_transform(features_scaled)
-    generate_plots(data, features, features_2d, k)
+    generate_pca_plot(data, features_2d, k)
 
-    # Save the results in a text file
-    save_results(data, cluster_profiles, diabetes_distribution)
-
-
-def stratified_kmeans(data_scaled, features, features_scaled, k):
+def stratified_kmeans(data_scaled):
     # Step 1: Segment data by diabetes status
     no_diabetes = data_scaled[data_scaled['Diabetes_012'] == 0]
     pre_diabetes = data_scaled[data_scaled['Diabetes_012'] == 1]
@@ -95,32 +89,21 @@ def stratified_kmeans(data_scaled, features, features_scaled, k):
         'Diabetes (2)': diabetes.mean()
     })
 
-    print("\nCluster Profiles by Diabetes Status (Mean Feature Values):")
-    print(cluster_profiles)
-
     # Step 3: Plot feature comparisons between the groups
     cluster_profiles.drop(index='Diabetes_012', inplace=True)  # Remove target column
     cluster_profiles = cluster_profiles.T
-    cluster_profiles.plot(kind='bar', figsize=(24, 10))
 
-    plt.title('Feature Comparison by Diabetes Status Cluster')
-    plt.xlabel('Health Indicators')
-    plt.ylabel('Average (or Percentage) Value')
+    generate_plot(cluster_profiles, "Feature Comparison by Diabetes Status Cluster", "Health Indicators", "Average (or Percentage) Value", "./graphs/feature_comparison_by_diabetes_status.png", 7)
+    save_results(cluster_profiles, "Feature Comparison by Diabetes Status Cluster", "./results/feature_comparison_by_diabetes_status.txt")
 
-    # Place the legend horizontally at the bottom
-    plt.legend(title='Diabetes Status', loc='upper center', ncol=5)
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
-    plt.savefig("./graphs/feature_comparison_by_diabetes_status.png")
 
 def main():
-    print("K-Means Clustering on CDC Diabetes Health Indicators Dataset")
+    clean_directory("./graphs")
+    clean_directory("./results")
 
+    print("K-Means Clustering on CDC Diabetes Health Indicators Dataset")
     # Read data from labels.csv
     data = read_data("../data/labels.csv")
-
-    # Clean the graphs folder
-    clean_directory("./graphs")
 
     # Separate the feature columns from the target column
     features = data.drop(columns=['Diabetes_012']) 
@@ -140,7 +123,7 @@ def main():
     data_scaled['Diabetes_012'] = target
 
     print("\nPerforming Stratified K-Means Clustering on the dataset")
-    stratified_kmeans(data_scaled, features, features_scaled, k)
+    stratified_kmeans(data_scaled)
     
 
 if __name__ == "__main__":

@@ -1,0 +1,6 @@
+Cluster Composition by Diabetes Status:
+Diabetes_012       0.0       1.0       2.0
+Cluster                                   
+0             0.867006  0.020374  0.112620
+1             0.657719  0.031442  0.310839
+2             0.906946  0.013378  0.079676

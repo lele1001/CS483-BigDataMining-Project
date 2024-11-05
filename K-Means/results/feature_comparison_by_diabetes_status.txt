@@ -1,0 +1,5 @@
+Feature Comparison by Diabetes Status Cluster:
+                    HighBP  HighChol  CholCheck       BMI    Smoker    Stroke  HeartDiseaseorAttack  PhysActivity    Fruits   Veggies  HvyAlcoholConsump  AnyHealthcare  NoDocbcCost   GenHlth  MentHlth  PhysHlth  DiffWalk       Sex       Age  Education    Income
+No Diabetes (0)  -0.116923 -0.090953  -0.029358 -0.096818 -0.027152 -0.045327             -0.076526      0.052504  0.018204  0.025613           0.024516      -0.006089    -0.016447 -0.130093 -0.032426 -0.075668 -0.096085 -0.012805 -0.080400   0.057007  0.074736
+Pre-Diabetes (1)  0.404137  0.398000   0.126299  0.354398  0.099842  0.084403              0.168429     -0.181916 -0.066461 -0.108574          -0.048988      -0.027347     0.162681  0.434457  0.181460  0.241597  0.292073 -0.005317  0.344191  -0.269776 -0.339312
+Diabetes (2)      0.653972  0.497760   0.160954  0.538935  0.151082  0.262992              0.440611     -0.293604 -0.101351 -0.140632          -0.141806       0.040400     0.078122  0.729627  0.172273  0.425835  0.542666  0.078115  0.441008  -0.309319 -0.407398
