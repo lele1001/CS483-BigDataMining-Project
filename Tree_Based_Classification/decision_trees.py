@@ -10,28 +10,31 @@ import os
 import time
 import json
 
+dt_setting_keys = ['setting_code', 'max_depth', 'max_features', 'random_state']
+
 def read_data(file_name):
     return pd.read_csv(file_name)
 
-def manage_single_result(result, path):
+def manage_single_result(result, path, draw=True):
     # Compute acuracy
     count_misclassified = (result['y_test'] != result['y_pred']).sum()
     test_accuracy = count_misclassified / len(result['y_test'])
 
-    # Plot confusion matrix
-    cm = confusion_matrix(result['y_test'], result['y_pred'])
-    sns.heatmap(cm, annot=True, fmt='d')
-    plt.title('Confusion Matrix')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    os.makedirs(path, exist_ok=True)
-    plt.savefig(f"{path}/confusion_matrix.png")
+    if draw:
+        # Plot confusion matrix
+        cm = confusion_matrix(result['y_test'], result['y_pred'])
+        sns.heatmap(cm, annot=True, fmt='d')
+        plt.title('Confusion Matrix')
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        os.makedirs(path, exist_ok=True)
+        plt.savefig(f"{path}/confusion_matrix.png")
 
-    plt.clf()
+        plt.clf()
 
     return test_accuracy, result['setting_code'], len(result['doubted_rows'])
 
-
+'''
 def aggregate_results_old(results, path):
     # Take all the settings, sort them by decreasing delta and plot test accuracy
     # wrt the delta
@@ -53,6 +56,7 @@ def aggregate_results_old(results, path):
     plt.savefig(f"{path}/test_accuracy_vs_time.png")
 
     plt.clf()
+'''
 
 def aggregate_results(results, path):
     # Initialize lists for test accuracies, deltas, doubts, and setting codes
@@ -63,7 +67,8 @@ def aggregate_results(results, path):
 
     # Extract data and collect each setting code
     for result in results.values():
-        test_accuracy, setting_code, doubt = manage_single_result(result, path)
+        test_accuracy, setting_code, doubt = manage_single_result(result, path, \
+                                                                  draw=False)
         test_accuracies.append(test_accuracy)
         deltas.append(result['delta'])
         doubts.append(doubt)
@@ -129,17 +134,31 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
         settings = json.load(file)
     print(f"[DT] - Best test accuracy: {max_test_accuracy} for setting {best_test_accuracy_setting}, which is:")
     print(settings[f"setting_{best_test_accuracy_setting}"])
+    print(f"[DT] - For this setting, the top 5 feature importances are:")
+    print(results[best_test_accuracy_setting]['feature_importances'][:5])
     print(f"[DT] - Best number of doubts: {min_number_doubts} for setting {best_doubts_setting}, which is:")
     print(settings[f"setting_{best_doubts_setting}"])
-    print(f"For this setting, the feature importances are:")
-    print(results[best_doubts_setting]['feature_importances'])
+    print(f"[DT] - For this setting, the top 5feature importances are:")
+    print(results[best_doubts_setting]['feature_importances'][:5])
 
     #os.makedirs(os.path.join(path, "DT_best_settings.txt"), exist_ok=True)
     with open(f"{path}/DT_best_settings.txt", "w") as file:
         file.write(f"Best test accuracy: {max_test_accuracy} for setting {best_test_accuracy_setting}, which is:\n")
         file.write(json.dumps(settings[f"setting_{best_test_accuracy_setting}"], indent=4))
+        file.write(f"Which corresponds to:\n")
+        build_temp_dict = {dt_setting_keys[i]:\
+                            settings[f"setting_{best_test_accuracy_setting}"][i] for i in range(len(dt_setting_keys))}
+        file.write(json.dumps(build_temp_dict, indent=4))
+        file.write(f"\nFor this setting, the feature importances are:\n")
+        
+        
+        file.write(results[best_test_accuracy_setting]['feature_importances'].to_string())
         file.write(f"\nBest number of doubts: {min_number_doubts} for setting {best_doubts_setting}, which is:\n")
         file.write(json.dumps(settings[f"setting_{best_doubts_setting}"], indent=4))
+        file.write(f"Which corresponds to:\n")
+        build_temp_dict = {dt_setting_keys[i]:\
+                            settings[f"setting_{best_doubts_setting}"][i] for i in range(len(dt_setting_keys))}
+        file.write(json.dumps(build_temp_dict, indent=4))
         file.write(f"\nFor this setting, the feature importances are:\n")
         file.write(results[best_doubts_setting]['feature_importances'].to_string())
 

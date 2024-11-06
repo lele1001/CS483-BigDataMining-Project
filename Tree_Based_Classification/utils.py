@@ -9,6 +9,10 @@ import os, shutil
 from scipy.linalg import svd as SVD
 import json
 
+dt_setting_keys = ['setting_code', 'max_depth', 'max_features', 'random_state']
+rf_setting_keys = ['setting_code', 'n_estimators', 'max_depth', 'max_features', 'random_state', 'n_jobs', 'bootstrap']
+ada_setting_keys = ['setting_code', 'n_estimators', 'learning_rate', 'random_state']
+
 def read_data(file_name):
     return pd.read_csv(file_name)
 
