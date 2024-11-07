@@ -104,13 +104,13 @@ def make_plots(dt_results, rf_results, ada_results):
 
     bagging_dt.generate_plots(rf_results, json_path = "./settings/rf_settings.json", \
                               path =  os.path.join("./graphs", "Random_Forest"))
-    print(f"Finished generating plots for Random Forest")
+    print(f"Finished generating plots for Random Forest\n")
     boosting_dt.generate_plots(ada_results, json_path = "./settings/ada_settings.json",\
                                 path = os.path.join("./graphs", "AdaBoost"))
-    print(f"Finished generating plots for AdaBoost")
+    print(f"Finished generating plots for AdaBoost\n")
     decision_trees.generate_plots(dt_results,json_path = "./settings/dt_settings.json",\
                                    path = os.path.join("./graphs", "Decision_Tree"))
-    print(f"Finished generating plots for Decision Tree")
+    print(f"Finished generating plots for Decision Tree\n")
 
 
         

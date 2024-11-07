@@ -103,7 +103,8 @@ def generate_plots(results, json_path, path):
 
     with open(json_path, "r") as file:
         settings = json.load(file)
-        
+
+    print("="*30 + " [AdaBoost Results] " + "="*30)
     print(f"[ADA] - Best test accuracy: {max_test_accuracy} for setting {max_test_accuracy_setting}, which is:")
     print(settings[f"setting_{max_test_accuracy_setting}"])
     print(f"[ADA] - For this setting, the top 5 feature importances are:")
@@ -113,6 +114,7 @@ def generate_plots(results, json_path, path):
     print(settings[f"setting_{min_number_of_doubts_setting}"])
     print(f"[ADA] - For this setting, the top 5 feature importances are:")
     print(results[min_number_of_doubts_setting]['feature_importances'][:5])
+    print("="*80+"\n")
 
     with open(f"{path}/ADA_best_settings.txt", "w") as file:
         file.write(f"Best test accuracy: {max_test_accuracy} for setting {max_test_accuracy_setting}, which is:\n")
@@ -124,7 +126,7 @@ def generate_plots(results, json_path, path):
                     for i in range(len(ada_setting_keys))
         }
         file.write(json.dumps(build_temp_dict, indent=4))
-        file.write(f"For this setting, the top 5 feature importances are:\n")
+        file.write(f"\nFor this setting, the top 5 feature importances are:\n")
         file.write(json.dumps(results[max_test_accuracy_setting]['feature_importances'].to_string(), indent=4))
         
         
@@ -137,7 +139,7 @@ def generate_plots(results, json_path, path):
                     for i in range(len(ada_setting_keys))
         }
         file.write(json.dumps(build_temp_dict, indent=4))
-        file.write(f"For this setting, the top 5 feature importances are:\n")
+        file.write(f"\nFor this setting, the top 5 feature importances are:\n")
         file.write(json.dumps(results[min_number_of_doubts_setting]['feature_importances'].to_string(), indent=4))
     aggregate_results(results, path)
     

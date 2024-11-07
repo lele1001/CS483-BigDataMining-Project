@@ -105,6 +105,7 @@ def generate_plots(results, json_path, path):
     with open(json_path, 'r') as json_file:
         settings = json.load(json_file)
 
+    print("="*27 + " [Random Forest Results] " + "="*28)
     print(f"[RF] - Max test accuracy: {max_test_accuracy} for setting {max_test_accuracy_setting}, which is:")
     print(settings[f"setting_{max_test_accuracy_setting}"])
     print(f"[RF] - For setting {max_test_accuracy_setting}, the top 5 feature importances are:")
@@ -114,6 +115,8 @@ def generate_plots(results, json_path, path):
     print(settings[f"setting_{min_number_doubts_setting}"])
     print(f"[RF] - For setting {min_number_doubts_setting}, the top 5 feature importances are:")
     print(results[min_number_doubts_setting]['feature_importances'][:5])
+
+    print("="*80 + "\n")
 
     with open(f"{path}/RF_best_settings.json", "w") as file:
         file.write(f"Best test accuracy: {max_test_accuracy} for setting {max_test_accuracy_setting}, which is:\n")

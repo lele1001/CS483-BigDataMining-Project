@@ -126,15 +126,17 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
 
     with open(json_path, "r") as file:
         settings = json.load(file)
+    print("="*27+" [Decision Tree results] "+"="*28)
     print(f"[DT] - Best test accuracy: {max_test_accuracy} for setting {best_test_accuracy_setting}, which is:")
     print(settings[f"setting_{best_test_accuracy_setting}"])
     print(f"[DT] - For this setting, the top 5 feature importances are:")
     print(results[best_test_accuracy_setting]['feature_importances'][:5])
+    
     print(f"[DT] - Best number of doubts: {min_number_doubts} for setting {best_doubts_setting}, which is:")
     print(settings[f"setting_{best_doubts_setting}"])
     print(f"[DT] - For this setting, the top 5feature importances are:")
     print(results[best_doubts_setting]['feature_importances'][:5])
-
+    print("="*80+"\n")
     #os.makedirs(os.path.join(path, "DT_best_settings.txt"), exist_ok=True)
     with open(f"{path}/DT_best_settings.txt", "w") as file:
         file.write(f"Best test accuracy: {max_test_accuracy} for setting {best_test_accuracy_setting}, which is:\n")
