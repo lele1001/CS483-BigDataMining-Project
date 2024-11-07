@@ -102,18 +102,10 @@ def make_plots(dt_results, rf_results, ada_results):
     clean_directory("./graphs")
     make_dirs("./graphs", subdirs)
 
-    '''if rf_results['classifier'].isinstance(RandomForestClassifier):
-        bagging_dt.generate_plots(rf_results, os.path.join("./graphs", "Random_Forest"))
-    elif ada_results['classifier'].isinstance(AdaBoostClassifier):
-        boosting_dt.generate_plots(ada_results, os.path.join("./graphs", "AdaBoost"))
-    elif dt_results['classifier'].isinstance(DecisionTreeClassifier):
-        decision_trees.generate_plots(dt_results, os.path.join("./graphs", "Decision_Tree"))
-    else:
-        raise ValueError("Classifier not recognized")'''
-    bagging_dt.generate_plots(rf_results, json_path = "./settings/dt_settings.json", \
+    bagging_dt.generate_plots(rf_results, json_path = "./settings/rf_settings.json", \
                               path =  os.path.join("./graphs", "Random_Forest"))
     print(f"Finished generating plots for Random Forest")
-    boosting_dt.generate_plots(ada_results, json_path = "./settings/dt_settings.json",\
+    boosting_dt.generate_plots(ada_results, json_path = "./settings/ada_settings.json",\
                                 path = os.path.join("./graphs", "AdaBoost"))
     print(f"Finished generating plots for AdaBoost")
     decision_trees.generate_plots(dt_results,json_path = "./settings/dt_settings.json",\

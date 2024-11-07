@@ -59,13 +59,11 @@ def aggregate_results_old(results, path):
 '''
 
 def aggregate_results(results, path):
-    # Initialize lists for test accuracies, deltas, doubts, and setting codes
     test_accuracies = []
     deltas = []
     doubts = []
     setting_codes = []
 
-    # Extract data and collect each setting code
     for result in results.values():
         test_accuracy, setting_code, doubt = manage_single_result(result, path, \
                                                                   draw=False)
@@ -74,27 +72,23 @@ def aggregate_results(results, path):
         doubts.append(doubt)
         setting_codes.append(setting_code)
 
-    # Create a colormap to differentiate settings by color
-    unique_settings = list(setting_codes) 
-    colors = plt.cm.tab10(np.linspace(0, 1, len(unique_settings)))
-    color_map = {setting: color for setting, color in zip(unique_settings, colors)}
-
     seen_labels = set()
+    unique_settings = len(set(setting_codes))
+    color_map = plt.cm.get_cmap("tab20c", unique_settings)
     for i in range(len(deltas)):
         setting_label = setting_codes[i]
-        # Only set the label for this setting if it hasn't been added yet
-        if setting_label not in seen_labels:
-            plt.scatter(deltas[i], test_accuracies[i], \
-                        color=color_map[setting_label], label=setting_label)
-            seen_labels.add(setting_label)
-        else:
-            plt.scatter(deltas[i], test_accuracies[i], color=color_map[setting_label])
+        color = color_map(setting_label)
+        plt.scatter(deltas[i], test_accuracies[i], color=color)  # Plot each point
+        plt.text(deltas[i], test_accuracies[i], str(setting_label), fontsize=8, ha='center', va='center')  # Add the label
 
     # Add labels, title, and legend to the plot
     plt.xlabel('[DT] - Time to train (s)')
     plt.ylabel('[DT] - Test accuracy')
     plt.title('[DT] - Test accuracy wrt time to train')
-    plt.legend(title="Settings")
+    #plt.legend(title="Settings")
+    #plt.subplots_adjust(right=0.6)
+    #plt.legend(title="Settings", ncol=4, bbox_to_anchor=(1.0, 1), loc='upper left')
+    plt.tight_layout()
     plt.savefig(f"{path}/test_accuracy_vs_time.png")
     plt.show()
 
@@ -150,9 +144,9 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
                             settings[f"setting_{best_test_accuracy_setting}"][i] for i in range(len(dt_setting_keys))}
         file.write(json.dumps(build_temp_dict, indent=4))
         file.write(f"\nFor this setting, the feature importances are:\n")
-        
-        
         file.write(results[best_test_accuracy_setting]['feature_importances'].to_string())
+        
+        
         file.write(f"\nBest number of doubts: {min_number_doubts} for setting {best_doubts_setting}, which is:\n")
         file.write(json.dumps(settings[f"setting_{best_doubts_setting}"], indent=4))
         file.write(f"Which corresponds to:\n")

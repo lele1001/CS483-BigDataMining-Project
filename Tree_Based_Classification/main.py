@@ -153,9 +153,8 @@ if __name__ == "__main__":
     # Now that we've got all the cores free again, we can run Random Forest
     rf_results = {}
     for i, rf_setting in enumerate(rf_settings_queue):
-        rf_classifier, X_test, y_test, y_pred, doubted_rows, delta_t, feat_imp, setting_code = \
-            bagging_dt.random_forest_classification(*rf_setting)
-        rf_results[setting_code] = rf_classifier, X_test, y_test, y_pred, doubted_rows, delta_t, feat_imp
+        result = bagging_dt.random_forest_classification(*rf_setting)
+        rf_results[result['setting_code']] = result
 
     print(f"Random Forest finished\nMaking plots...")
     utils.make_plots(dt_results, rf_results, ada_results)
