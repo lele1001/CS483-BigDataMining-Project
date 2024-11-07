@@ -18,7 +18,8 @@ def read_data(file_name):
 def manage_single_result(result, path, draw = True):
     # Compute acuracy
     count_misclassified = (result['y_test'] != result['y_pred']).sum()
-    test_accuracy = count_misclassified / len(result['y_test'])
+    count_correct = (result['y_test'] == result['y_pred']).sum()
+    test_accuracy = count_correct / len(result['y_test'])
 
     if draw:
         # Plot confusion matrix
