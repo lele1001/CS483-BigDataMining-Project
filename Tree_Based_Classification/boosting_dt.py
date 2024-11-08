@@ -51,6 +51,7 @@ def aggregate_results(results, path):
     seen_labels = set()
     unique_settings = len(set(setting_codes))
     color_map = plt.cm.get_cmap("tab20c", unique_settings) 
+    plt.figure()
     for i in range(len(deltas)):
         setting_label = setting_codes[i]
         color = color_map(setting_label)
@@ -66,8 +67,37 @@ def aggregate_results(results, path):
     # plt.legend(title="Settings", ncol=4, bbox_to_anchor=(1.0, 1), loc='upper left')
     plt.tight_layout()
     plt.savefig(f"{path}/test_accuracy_vs_time.png")
-    plt.show()
+    #plt.show()
 
+    plt.clf()
+
+    # Plot accuracy wrt tree size
+    setting_to_depth = {}
+    for result in results.values():
+        setting_label = result['setting_code']
+        model = result['classifier']
+
+        sum =  0
+        for e in model.estimators_:
+            sum += e.get_depth()
+        model_depth = sum / len(model.estimators_)
+
+        setting_to_depth[setting_label] = model_depth
+
+    depths = [setting_to_depth[setting] for setting in setting_to_depth]
+    
+    color_map = plt.cm.get_cmap("tab20c", unique_settings)
+    for i in range(len(depths)):
+        setting_label = setting_codes[i]
+        color = color_map(setting_label)
+        plt.scatter(depths[i], test_accuracies[i], color=color)
+        plt.text(depths[i], test_accuracies[i], str(setting_label), fontsize=8, ha='center', va='center')
+
+    plt.xlabel('[ADA] - Depth of the tree')
+    plt.ylabel('[ADA] - Test accuracy')
+    plt.title('[ADA] - Test accuracy wrt depth of the tree')
+    plt.tight_layout()
+    plt.savefig(f"{path}/test_accuracy_vs_depth.png")
     plt.clf()
 
 
@@ -143,6 +173,7 @@ def generate_plots(results, json_path, path):
         file.write(f"\nFor this setting, the top 5 feature importances are:\n")
         file.write(json.dumps(results[min_number_of_doubts_setting]['feature_importances'].to_string(), indent=4))
     aggregate_results(results, path)
+    return max_test_accuracy_setting
     
 
 
@@ -194,7 +225,7 @@ def AdaBoost_classification(setting_code, data, features, target,  train_input, 
 
     ada_classifier = AdaBoostClassifier(n_estimators=n_estimators, learning_rate=learning_rate, random_state=random_state, algorithm='SAMME')
     start = time.time()
-    ada_classifier.fit(X_train, y_train)
+    ada_classifier = ada_classifier.fit(X_train, y_train)
     end = time.time()
     delay = end - start
 

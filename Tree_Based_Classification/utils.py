@@ -97,20 +97,62 @@ def make_dirs(root, subdirs):
                 os.makedirs(f"{root}/{subdir}")
         
 
+def plot_feature_importances(path, dt_best_setting_code, rf_best_setting_code, \
+                             ada_best_setting_code, dt_results, rf_results,\
+                            ada_results):
+    dt_result = dt_results[dt_best_setting_code]
+    rf_result = rf_results[rf_best_setting_code]
+    ada_result = ada_results[ada_best_setting_code]
+
+    dt_feature_importances_df = dt_result['feature_importances']
+    rf_feature_importances_df = rf_result['feature_importances']
+    ada_feature_importances_df = ada_result['feature_importances']
+
+    # Plot on a bar plot divided by the 3 models. dt_feature_importance_df.index has length 21
+    fig, ax = plt.subplots(3, 1, figsize=(10, 15))
+
+    ax[0].barh(dt_feature_importances_df.index, dt_feature_importances_df['importance'])
+    ax[0].set_title("Decision Tree Feature Importances")
+    ax[0].set_xlabel("Importance")
+    ax[0].set_ylabel("Feature")
+
+    ax[1].barh(rf_feature_importances_df.index, rf_feature_importances_df['importance'])
+    ax[1].set_title("Random Forest Feature Importances")
+    ax[1].set_xlabel("Importance")
+    ax[1].set_ylabel("Feature")
+
+    ax[2].barh(ada_feature_importances_df.index, ada_feature_importances_df['importance'])
+    ax[2].set_title("AdaBoost Feature Importances")
+    ax[2].set_xlabel("Importance")
+    ax[2].set_ylabel("Feature")
+
+    plt.tight_layout()
+
+    plt.savefig(f"{path}/feature_importances.png")
+
+
 def make_plots(dt_results, rf_results, ada_results):
     subdirs = ["Random_Forest", "AdaBoost", "Decision_Tree"]
     clean_directory("./graphs")
     make_dirs("./graphs", subdirs)
 
-    bagging_dt.generate_plots(rf_results, json_path = "./settings/rf_settings.json", \
+    rf_best_accuracy_setting = bagging_dt.generate_plots(\
+        rf_results, json_path = "./settings/rf_settings.json", \
                               path =  os.path.join("./graphs", "Random_Forest"))
     print(f"Finished generating plots for Random Forest\n")
-    boosting_dt.generate_plots(ada_results, json_path = "./settings/ada_settings.json",\
+    ada_best_accuracy_setting = boosting_dt.generate_plots(\
+        ada_results, json_path = "./settings/ada_settings.json",\
                                 path = os.path.join("./graphs", "AdaBoost"))
     print(f"Finished generating plots for AdaBoost\n")
-    decision_trees.generate_plots(dt_results,json_path = "./settings/dt_settings.json",\
+    dt_best_accuracy_setting = decision_trees.generate_plots(\
+        dt_results,json_path = "./settings/dt_settings.json",\
                                    path = os.path.join("./graphs", "Decision_Tree"))
     print(f"Finished generating plots for Decision Tree\n")
+
+    plot_feature_importances("./graphs", dt_best_accuracy_setting, \
+                             rf_best_accuracy_setting, ada_best_accuracy_setting,\
+                            dt_results, rf_results, ada_results)
+    
 
 
         

@@ -76,6 +76,7 @@ def aggregate_results(results, path):
     seen_labels = set()
     unique_settings = len(set(setting_codes))
     color_map = plt.cm.get_cmap("tab20c", unique_settings)
+    plt.figure()
     for i in range(len(deltas)):
         setting_label = setting_codes[i]
         color = color_map(setting_label)
@@ -91,9 +92,36 @@ def aggregate_results(results, path):
     #plt.legend(title="Settings", ncol=4, bbox_to_anchor=(1.0, 1), loc='upper left')
     plt.tight_layout()
     plt.savefig(f"{path}/test_accuracy_vs_time.png")
-    plt.show()
-
+    #plt.show()
     plt.clf()
+
+    # Plot accuracy wrt tree size
+    setting_to_depth = {}
+    for result in results.values():
+        setting_label = result['setting_code']
+        model = result['classifier']
+
+        model_depth = model.get_depth()
+
+        setting_to_depth[setting_label] = model_depth
+
+    depths = [setting_to_depth[setting] for setting in setting_to_depth]
+
+    color_map = plt.cm.get_cmap("tab20c", unique_settings)
+    for i in range(len(depths)):
+        setting_label = setting_codes[i]
+        color = color_map(setting_label)
+        plt.scatter(depths[i], test_accuracies[i], color=color)
+        plt.text(depths[i], test_accuracies[i], str(setting_label), fontsize=8, ha='center', va='center')
+
+    plt.xlabel('[DT] - Depth of the tree')
+    plt.ylabel('[DT] - Test accuracy')
+    plt.title('[DT] - Test accuracy wrt depth of the tree')
+    plt.tight_layout()
+    plt.savefig(f"{path}/test_accuracy_vs_depth.png")
+    plt.clf()
+
+
 
 def generate_plots(results, json_path = "./settings/dt_settings.json", \
                     path = "./graphs"):
@@ -160,6 +188,7 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
         file.write(results[best_doubts_setting]['feature_importances'].to_string())
 
     aggregate_results(results, path)
+    return best_test_accuracy_setting
 
 
 def decision_tree_classification(setting_code, data, features, target, train_input, \
@@ -211,7 +240,7 @@ def decision_tree_classification(setting_code, data, features, target, train_inp
     X_test, y_test = test_input, test_target        # to evaluate 
 
     start = time.time()
-    tree_classifier.fit(X_train, y_train)
+    tree_classifier = tree_classifier.fit(X_train, y_train)
     end = time.time()
     delta = end - start
 

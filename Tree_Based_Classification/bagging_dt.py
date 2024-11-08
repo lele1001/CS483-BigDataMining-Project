@@ -52,7 +52,8 @@ def aggregate_results(results, path):
 
     seen_labels = set()
     unique_settings = len(set(setting_codes))
-    color_map = plt.cm.get_cmap("tab20c", unique_settings)  
+    color_map = plt.cm.get_cmap("tab20c", unique_settings) 
+    plt.figure() 
     for i in range(len(deltas)):
         setting_label = setting_codes[i]
         color = color_map(setting_label)
@@ -62,14 +63,90 @@ def aggregate_results(results, path):
     # Add labels, title, and legend to the plot
     plt.xlabel('[RF] - Time to train (s)')
     plt.ylabel('[RF] - Test accuracy')
+    # make yticks range from test_accuracy.min() to test_accuracy.max() with step 0.005
     plt.title('[RF] - Test accuracy wrt time to train')
     #plt.legend(title="Settings")
     #plt.subplots_adjust(right=0.6)
     #plt.legend(title="Settings", ncol=4, bbox_to_anchor=(1.0, 1), loc='upper left')
     plt.tight_layout()
     plt.savefig(f"{path}/test_accuracy_vs_time.png")
-    plt.show()
+    #plt.show()
 
+    plt.clf()
+
+    # Plot accuracy wrt tree size
+    setting_to_depth = {}
+    for result in results.values():
+        setting_label = result['setting_code']
+        model = result['classifier']
+
+        model_estimators = model.estimators_
+        sum = 0
+        for e in model_estimators:
+            sum += e.get_depth()
+        model_depth = sum / len(model_estimators)
+        #model_nodes = model.tree_.node_count
+
+        setting_to_depth[setting_label] = model_depth
+
+    depths = [setting_to_depth[setting] for setting in setting_to_depth]
+
+    plt.figure(figsize=(10, 10))
+    plt.xlabel('[RF] - Depth of the tree')
+    plt.ylabel('[RF] - Test accuracy')
+    plt.xlim(0, max(depths) + 5)
+    plt.ylim(min(test_accuracies)-0.01, max(test_accuracies)+0.01)
+    plt.xticks(range(int(min(depths)), int(max(depths) + 5), 5))
+    #plt.yticks(np.arange(min(test_accuracies), 1 + 0.0005, 0.0005))
+    plt.yticks(np.arange(min(test_accuracies) - 0.01, max(test_accuracies) + 0.01, 0.002))
+    
+    ''' FIRST WAY of solving the problem of points being too dense
+    # the test_accuracies are still too close for some settings, so:
+    test_accuracies = [round(acc, 3) for acc in test_accuracies]
+    new_test_accuracies = list(set(test_accuracies))
+    new_depths = []
+    for i in range(len(new_test_accuracies)):
+        new_depths.append(
+            (depths[test_accuracies.index(new_test_accuracies[i])],
+             setting_codes[test_accuracies.index(new_test_accuracies[i])])
+        )
+    depths = new_depths
+    test_accuracies = new_test_accuracies
+    unique_settings = len(set([depths[i][1] for i in range(len(depths))]))
+    color_map = plt.cm.get_cmap("tab20c", unique_settings)
+    for i in range(len(depths)):
+        #setting_label = setting_codes[i]
+        setting_label = depths[i][1]
+        depth = depths[i][0]
+        color = color_map(setting_label)
+        plt.scatter(depth, test_accuracies[i], color=color)
+        plt.text(depth, test_accuracies[i], str(setting_label), fontsize=8, ha='center', va='center')
+    '''
+
+    # SECOND WAY of solving the problem of points being too dense
+    depths = [round(depth, 3) for depth in depths]
+    new_depths = list(set(depths))
+    new_test_accuracies = []
+    for i in range(len(new_depths)):
+        new_test_accuracies.append(
+            (test_accuracies[depths.index(new_depths[i])],
+             setting_codes[depths.index(new_depths[i])])
+        )
+    test_accuracies = new_test_accuracies
+    depths = new_depths
+    unique_settings = len(set([test_accuracies[i][1] for i in range(len(test_accuracies))]))
+    color_map = plt.cm.get_cmap("tab20c", unique_settings)
+    for i in range(len(test_accuracies)):
+        #setting_label = setting_codes[i]
+        setting_label = test_accuracies[i][1]
+        test_accuracy = test_accuracies[i][0]
+        color = color_map(setting_label)
+        plt.scatter(depths[i], test_accuracy, color=color)
+        plt.text(depths[i], test_accuracy, str(setting_label), fontsize=8, ha='center', va='center')
+
+    plt.title('[RF] - Test accuracy wrt avg depth of the forest')
+    #plt.tight_layout()
+    plt.savefig(f"{path}/test_accuracy_vs_depth.png")
     plt.clf()
 
    
@@ -145,6 +222,7 @@ def generate_plots(results, json_path, path):
         file.write(str(results[min_number_doubts_setting]['feature_importances'].to_string()))
 
     aggregate_results(results, path)
+    return max_test_accuracy_setting
 
 
 
@@ -218,7 +296,7 @@ def random_forest_classification(setting_code, data, features, target,  train_in
                                         random_state=random_state, n_jobs=n_jobs, \
                                         bootstrap=bootstrap)
     start_time = time.time()
-    rf_classifier.fit(X_train, y_train)
+    rf_classifier = rf_classifier.fit(X_train, y_train)
     end_time = time.time()
     delta = end_time - start_time  
 
