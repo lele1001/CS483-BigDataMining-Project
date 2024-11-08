@@ -1,0 +1,29 @@
+Best test accuracy: 0.8496531062756228 for setting 0, which is:
+[
+    0,
+    100,
+    1,
+    42
+]Which corresponds to:
+{
+    "setting_code": 0,
+    "n_estimators": 100,
+    "learning_rate": 1,
+    "random_state": 42
+}
+For this setting, the top 5 feature importances are:
+"                      importance\nHighBP                  0.355895\nGenHlth                 0.250904\nBMI                     0.102442\nAge                     0.070163\nCholCheck               0.069813\nHighChol                0.046075\nHvyAlcoholConsump       0.023169\nIncome                  0.021554\nSex                     0.012139\nMentHlth                0.011084\nNoDocbcCost             0.009413\nHeartDiseaseorAttack    0.008712\nDiffWalk                0.007787\nEducation               0.007318\nStroke                  0.003531\nPhysActivity            0.000000\nFruits                  0.000000\nVeggies                 0.000000\nAnyHealthcare           0.000000\nPhysHlth                0.000000\nSmoker                  0.000000"Best number of doubts: 0 for setting 8, which is:
+[
+    8,
+    10,
+    0.1,
+    42
+]Which corresponds to:
+{
+    "setting_code": 8,
+    "n_estimators": 10,
+    "learning_rate": 0.1,
+    "random_state": 42
+}
+For this setting, the top 5 feature importances are:
+"                      importance\nHighBP                  0.846657\nGenHlth                 0.153343\nAnyHealthcare           0.000000\nEducation               0.000000\nAge                     0.000000\nSex                     0.000000\nDiffWalk                0.000000\nPhysHlth                0.000000\nMentHlth                0.000000\nNoDocbcCost             0.000000\nHvyAlcoholConsump       0.000000\nHighChol                0.000000\nVeggies                 0.000000\nFruits                  0.000000\nPhysActivity            0.000000\nHeartDiseaseorAttack    0.000000\nStroke                  0.000000\nSmoker                  0.000000\nBMI                     0.000000\nCholCheck               0.000000\nIncome                  0.000000"

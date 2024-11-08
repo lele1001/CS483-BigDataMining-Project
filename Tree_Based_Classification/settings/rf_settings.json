@@ -1,0 +1,514 @@
+{
+    "setting_0": [
+        0,
+        100,
+        null,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_1": [
+        1,
+        100,
+        null,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_2": [
+        2,
+        100,
+        null,
+        21,
+        42,
+        false
+    ],
+    "setting_3": [
+        3,
+        100,
+        null,
+        21,
+        42,
+        true
+    ],
+    "setting_4": [
+        4,
+        100,
+        9,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_5": [
+        5,
+        100,
+        9,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_6": [
+        6,
+        100,
+        9,
+        21,
+        42,
+        false
+    ],
+    "setting_7": [
+        7,
+        100,
+        9,
+        21,
+        42,
+        true
+    ],
+    "setting_8": [
+        8,
+        100,
+        5,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_9": [
+        9,
+        100,
+        5,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_10": [
+        10,
+        100,
+        5,
+        21,
+        42,
+        false
+    ],
+    "setting_11": [
+        11,
+        100,
+        5,
+        21,
+        42,
+        true
+    ],
+    "setting_12": [
+        12,
+        100,
+        3,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_13": [
+        13,
+        100,
+        3,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_14": [
+        14,
+        100,
+        3,
+        21,
+        42,
+        false
+    ],
+    "setting_15": [
+        15,
+        100,
+        3,
+        21,
+        42,
+        true
+    ],
+    "setting_16": [
+        16,
+        50,
+        null,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_17": [
+        17,
+        50,
+        null,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_18": [
+        18,
+        50,
+        null,
+        21,
+        42,
+        false
+    ],
+    "setting_19": [
+        19,
+        50,
+        null,
+        21,
+        42,
+        true
+    ],
+    "setting_20": [
+        20,
+        50,
+        9,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_21": [
+        21,
+        50,
+        9,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_22": [
+        22,
+        50,
+        9,
+        21,
+        42,
+        false
+    ],
+    "setting_23": [
+        23,
+        50,
+        9,
+        21,
+        42,
+        true
+    ],
+    "setting_24": [
+        24,
+        50,
+        5,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_25": [
+        25,
+        50,
+        5,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_26": [
+        26,
+        50,
+        5,
+        21,
+        42,
+        false
+    ],
+    "setting_27": [
+        27,
+        50,
+        5,
+        21,
+        42,
+        true
+    ],
+    "setting_28": [
+        28,
+        50,
+        3,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_29": [
+        29,
+        50,
+        3,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_30": [
+        30,
+        50,
+        3,
+        21,
+        42,
+        false
+    ],
+    "setting_31": [
+        31,
+        50,
+        3,
+        21,
+        42,
+        true
+    ],
+    "setting_32": [
+        32,
+        21,
+        null,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_33": [
+        33,
+        21,
+        null,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_34": [
+        34,
+        21,
+        null,
+        21,
+        42,
+        false
+    ],
+    "setting_35": [
+        35,
+        21,
+        null,
+        21,
+        42,
+        true
+    ],
+    "setting_36": [
+        36,
+        21,
+        9,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_37": [
+        37,
+        21,
+        9,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_38": [
+        38,
+        21,
+        9,
+        21,
+        42,
+        false
+    ],
+    "setting_39": [
+        39,
+        21,
+        9,
+        21,
+        42,
+        true
+    ],
+    "setting_40": [
+        40,
+        21,
+        5,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_41": [
+        41,
+        21,
+        5,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_42": [
+        42,
+        21,
+        5,
+        21,
+        42,
+        false
+    ],
+    "setting_43": [
+        43,
+        21,
+        5,
+        21,
+        42,
+        true
+    ],
+    "setting_44": [
+        44,
+        21,
+        3,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_45": [
+        45,
+        21,
+        3,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_46": [
+        46,
+        21,
+        3,
+        21,
+        42,
+        false
+    ],
+    "setting_47": [
+        47,
+        21,
+        3,
+        21,
+        42,
+        true
+    ],
+    "setting_48": [
+        48,
+        10,
+        null,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_49": [
+        49,
+        10,
+        null,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_50": [
+        50,
+        10,
+        null,
+        21,
+        42,
+        false
+    ],
+    "setting_51": [
+        51,
+        10,
+        null,
+        21,
+        42,
+        true
+    ],
+    "setting_52": [
+        52,
+        10,
+        9,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_53": [
+        53,
+        10,
+        9,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_54": [
+        54,
+        10,
+        9,
+        21,
+        42,
+        false
+    ],
+    "setting_55": [
+        55,
+        10,
+        9,
+        21,
+        42,
+        true
+    ],
+    "setting_56": [
+        56,
+        10,
+        5,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_57": [
+        57,
+        10,
+        5,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_58": [
+        58,
+        10,
+        5,
+        21,
+        42,
+        false
+    ],
+    "setting_59": [
+        59,
+        10,
+        5,
+        21,
+        42,
+        true
+    ],
+    "setting_60": [
+        60,
+        10,
+        3,
+        "sqrt",
+        42,
+        false
+    ],
+    "setting_61": [
+        61,
+        10,
+        3,
+        "sqrt",
+        42,
+        true
+    ],
+    "setting_62": [
+        62,
+        10,
+        3,
+        21,
+        42,
+        false
+    ],
+    "setting_63": [
+        63,
+        10,
+        3,
+        21,
+        42,
+        true
+    ]
+}

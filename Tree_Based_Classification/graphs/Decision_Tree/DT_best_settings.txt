@@ -1,0 +1,72 @@
+Best test accuracy: 0.8490026805424157 for setting 5, which is:
+[
+    5,
+    5,
+    21,
+    42
+]Which corresponds to:
+{
+    "setting_code": 5,
+    "max_depth": 5,
+    "max_features": 21,
+    "random_state": 42
+}
+For this setting, the feature importances are:
+                      importance
+HighBP                  0.444426
+GenHlth                 0.325430
+BMI                     0.113515
+Age                     0.076218
+HighChol                0.040411
+NoDocbcCost             0.000000
+Education               0.000000
+Sex                     0.000000
+DiffWalk                0.000000
+PhysHlth                0.000000
+MentHlth                0.000000
+HvyAlcoholConsump       0.000000
+AnyHealthcare           0.000000
+Veggies                 0.000000
+Fruits                  0.000000
+PhysActivity            0.000000
+HeartDiseaseorAttack    0.000000
+Stroke                  0.000000
+Smoker                  0.000000
+CholCheck               0.000000
+Income                  0.000000
+Best number of doubts: 0 for setting 2, which is:
+[
+    2,
+    9,
+    "sqrt",
+    42
+]Which corresponds to:
+{
+    "setting_code": 2,
+    "max_depth": 9,
+    "max_features": "sqrt",
+    "random_state": 42
+}
+For this setting, the feature importances are:
+                      importance
+GenHlth                 0.436224
+HighBP                  0.164421
+BMI                     0.123620
+Age                     0.110650
+HighChol                0.052746
+Income                  0.032306
+HeartDiseaseorAttack    0.020634
+DiffWalk                0.012563
+PhysHlth                0.007690
+Education               0.006695
+CholCheck               0.006297
+HvyAlcoholConsump       0.006086
+MentHlth                0.006027
+Sex                     0.003824
+Veggies                 0.002161
+NoDocbcCost             0.001719
+Smoker                  0.001657
+Stroke                  0.001644
+PhysActivity            0.001459
+Fruits                  0.001165
+AnyHealthcare           0.000409

@@ -196,7 +196,7 @@ def generate_plots(results, json_path, path):
 
     print("="*80 + "\n")
 
-    with open(f"{path}/RF_best_settings.json", "w") as file:
+    with open(f"{path}/RF_best_settings.txt", "w") as file:
         file.write(f"Best test accuracy: {max_test_accuracy} for setting {max_test_accuracy_setting}, which is:\n")
         file.write(json.dumps(settings[f"setting_{max_test_accuracy_setting}"], indent=4))
         file.write(f"Which corresponds to:\n")

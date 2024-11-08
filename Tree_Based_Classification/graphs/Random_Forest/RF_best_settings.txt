@@ -1,0 +1,81 @@
+Best test accuracy: 0.8506583096814885 for setting 23, which is:
+[
+    23,
+    50,
+    9,
+    21,
+    42,
+    true
+]Which corresponds to:
+{
+    "setting_code": 23,
+    "n_estimators": 50,
+    "max_depth": 9,
+    "max_features": 21,
+    "random_state": 42,
+    "bootstrap": true
+}
+For this setting, the top 5 feature importances are:
+                      importance
+HighBP                  0.328928
+GenHlth                 0.268448
+BMI                     0.155714
+Age                     0.078517
+HighChol                0.059111
+Income                  0.018335
+HeartDiseaseorAttack    0.015785
+PhysHlth                0.012198
+Education               0.010864
+MentHlth                0.009906
+DiffWalk                0.007638
+HvyAlcoholConsump       0.006266
+Sex                     0.006041
+Stroke                  0.005213
+Veggies                 0.003220
+Smoker                  0.002977
+PhysActivity            0.002734
+NoDocbcCost             0.002370
+AnyHealthcare           0.002191
+Fruits                  0.002010
+CholCheck               0.001530
+
+Min number of doubts: 0 for setting 4, which is:
+[
+    4,
+    100,
+    9,
+    "sqrt",
+    42,
+    false
+]Which corresponds to:
+{
+    "setting_code": 4,
+    "n_estimators": 100,
+    "max_depth": 9,
+    "max_features": "sqrt",
+    "random_state": 42,
+    "bootstrap": false
+}
+For this setting, the top 5 feature importances are:
+                      importance
+HighBP                  0.216210
+GenHlth                 0.215684
+BMI                     0.168267
+HighChol                0.104137
+DiffWalk                0.072206
+Age                     0.065071
+HeartDiseaseorAttack    0.041318
+PhysHlth                0.033735
+Income                  0.026812
+PhysActivity            0.010326
+Education               0.010320
+Stroke                  0.007092
+HvyAlcoholConsump       0.006686
+CholCheck               0.005457
+MentHlth                0.005031
+Sex                     0.004455
+Smoker                  0.001792
+Veggies                 0.001584
+NoDocbcCost             0.001406
+AnyHealthcare           0.001343
+Fruits                  0.001067
