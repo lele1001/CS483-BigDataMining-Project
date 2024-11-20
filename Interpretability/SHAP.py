@@ -72,7 +72,7 @@ class DiabetesPredictor:
         return result
 
 
-data_path = '../data/balanced.csv'
+'''data_path = '../data/balanced.csv'
 
 data = pd.read_csv(data_path)
 random_row = data.sample(n=1, random_state=42)
@@ -81,4 +81,4 @@ patient_data = list(random_row.to_numpy().flatten())
 predictor = DiabetesPredictor()
 
 result = predictor.predict_and_interpret(patient_data)
-print(result)
+print(result)'''
