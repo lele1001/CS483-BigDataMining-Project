@@ -66,6 +66,51 @@ class DiabetesPredictor:
         return result
 
 
+# Generates a prompt for the GPT model based on the prediction and feature analysis
+def generate_prompt(result, patient_data, feature_names):
+    feature_details = "\n".join(
+        [f"{name}: {value}" for name, value in zip(feature_names, patient_data)]
+    )
+
+    # Extract the top positive and negative features
+    good_features = ", ".join(
+        [f"{item['feature']} ({item['contribution']:.2f})" for item in result["good_features"]]
+    )
+    bad_features = ", ".join(
+        [f"{item['feature']} ({item['contribution']:.2f})" for item in result["bad_features"]]
+    )
+
+    # Generate the prompt
+    prompt = f"""
+        Patient Analysis Report:
+        - Predicted Probability of being Healthy: {result['prediction']:.2f}
+        - Average Contribution of Features: {result['average_impact']:.2f}
+
+        Key Positive Features (supporting health): {good_features}
+        Key Negative Features (indicating risks): {bad_features}
+
+        Detailed Feature Values:
+        {feature_details}
+
+        Generate a professional report explaining the patient's health condition based on the predicted probability and the feature analysis above. Highlight potential areas of improvement and suggestions for a healthier lifestyle.
+    """
+    return prompt
+
+# Generates a patient report using the GPT model
+def generate_patient_report(result, patient_data, feature_names):
+    prompt = generate_prompt(result, patient_data, feature_names)
+
+    # Call the model to generate the report
+    response = ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    # Stampa o ritorna il report
+    print(response.choices[0].message['content'])
+    return response.choices[0].message['content']
+
+
 data_path = '../data/balanced.csv'
 
 data = pd.read_csv(data_path)
