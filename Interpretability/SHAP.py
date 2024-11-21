@@ -7,15 +7,21 @@ from sklearn.preprocessing import MinMaxScaler
 class DiabetesPredictor:
     def __init__(self, model_path="../models/FNN.h5", csv_path='../data/balanced.csv', sample_size=100, feature_names=[]):
         # Load the Keras model
-        self.model = tf.keras.models.load_model(model_path)
+        try:
+            self.model = tf.keras.models.load_model(model_path)
+        except Exception:
+            pass
         self.csv_path = csv_path
         self.sample_size = sample_size
         self.feature_names = ["Has High Blood Pressure (0 no, 1 yes)", "Has High Cholesterole (0 no, 1 yes)", "Does Cholesterole Check (0 no, 1 yes)", "Body Mass Index", "Is a Smoker (0 no, 1 yes)", "Had a Stroke (0 no, 1 yes)", "Has an Heart Disease (0 no, 1 yes)", "Does Physical Activity (0 no, 1 yes)", "Eats Fruits (0 no, 1 yes)", "Eats Veggies (0 no, 1 yes)", "High Alchol Consume (0 no, 1 yes)", "Has Health Insurance (0 no, 1 yes)", "Can pay for a Doctor (0 yes, 1 no)", "General Health Coeffient", "Mental Health Coeffient", "Physical Health Coeffient", "Has difficulty in Walking (0 no, 1 yes)", "Sex of the patient (0 female, 1 male)", "Age Coefficent", "Education Level Coeffient", "Income Level Coeffient"]
         self.shap_explainer = None
 
         # Load baseline sample data for SHAP computation
-        self.baseline_data = self.load_sample_data()
-        self.compute_shap_explainer()
+        try:
+            self.baseline_data = self.load_sample_data()
+            self.compute_shap_explainer()
+        except  Exception:
+            pass
 
     def get_feature_names(self):
         return self.feature_names
@@ -111,7 +117,7 @@ def generate_patient_report(result, patient_data, feature_names):
     return response.choices[0].message['content']
 
 
-data_path = '../data/balanced.csv'
+'''data_path = '../data/balanced.csv'
 
 data = pd.read_csv(data_path)
 random_row = data.sample(n=1, random_state=42)
@@ -120,4 +126,4 @@ patient_data = list(random_row.to_numpy().flatten())
 predictor = DiabetesPredictor()
 
 result = predictor.predict_and_interpret(patient_data)
-print(result)
+print(result)'''
