@@ -53,13 +53,13 @@ class DiabetesPredictor:
         sorted_features = [self.feature_names[i] for i in sorted_indices]
         sorted_contributions = [abs_shap_values[i] for i in sorted_indices]
 
-        bad_features = [
+        good_features = [
             {"feature": sorted_features[i], "contribution": sorted_contributions[i]}
             for i in range(3)
         ]
-        good_features = [
+        bad_features = [
             {"feature": sorted_features[i], "contribution": sorted_contributions[i]}
-            for i in range(-3, 0)
+            for i in range(-1, -4, -1)
         ]
 
         result = {
