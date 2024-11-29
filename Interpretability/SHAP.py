@@ -49,15 +49,15 @@ class DiabetesPredictor:
         abs_shap_values = np.abs(shap_values_patient)
         
         # Sort features and SHAP values by absolute contribution
-        sorted_indices = np.argsort(abs_shap_values)[::-1]
+        sorted_indices = np.argsort(shap_values_patient)
         sorted_features = [self.feature_names[i] for i in sorted_indices]
         sorted_contributions = [abs_shap_values[i] for i in sorted_indices]
 
-        good_features = [
+        bad_features = [
             {"feature": sorted_features[i], "contribution": sorted_contributions[i]}
             for i in range(3)
         ]
-        bad_features = [
+        good_features = [
             {"feature": sorted_features[i], "contribution": sorted_contributions[i]}
             for i in range(-3, 0)
         ]
