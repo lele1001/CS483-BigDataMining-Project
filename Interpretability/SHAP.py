@@ -3,6 +3,11 @@ import pandas as pd
 import shap
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
+import logging
+import google.generativeai as genai
+import os
+
+API_KEY = "AIzaSyAyfAVs9KTJfTdDETLGemhWCcG1MQsqLgY"
 
 class DiabetesPredictor:
     def __init__(self, model_path="../models/FNN.h5", csv_path='../data/balanced.csv', sample_size=100, feature_names=[]):
@@ -13,7 +18,28 @@ class DiabetesPredictor:
             pass
         self.csv_path = csv_path
         self.sample_size = sample_size
-        self.feature_names = ["Has High Blood Pressure (0 no, 1 yes)", "Has High Cholesterole (0 no, 1 yes)", "Does Cholesterole Check (0 no, 1 yes)", "Body Mass Index", "Is a Smoker (0 no, 1 yes)", "Had a Stroke (0 no, 1 yes)", "Has an Heart Disease (0 no, 1 yes)", "Does Physical Activity (0 no, 1 yes)", "Eats Fruits (0 no, 1 yes)", "Eats Veggies (0 no, 1 yes)", "High Alchol Consume (0 no, 1 yes)", "Has Health Insurance (0 no, 1 yes)", "Can pay for a Doctor (0 yes, 1 no)", "General Health Coeffient", "Mental Health Coeffient", "Physical Health Coeffient", "Has difficulty in Walking (0 no, 1 yes)", "Sex of the patient (0 female, 1 male)", "Age Coefficent", "Education Level Coeffient", "Income Level Coeffient"]
+        self.feature_names = [
+            "Has High Blood Pressure (0 no, 1 yes)", 
+            "Has High Cholesterole (0 no, 1 yes)", 
+            "Does Cholesterole Check (0 no, 1 yes)", 
+            "Body Mass Index", "Is a Smoker (0 no, 1 yes)", 
+            "Had a Stroke (0 no, 1 yes)", 
+            "Has an Heart Disease (0 no, 1 yes)", 
+            "Does Physical Activity (0 no, 1 yes)", 
+            "Eats Fruits (0 no, 1 yes)", 
+            "Eats Veggies (0 no, 1 yes)", 
+            "High Alchol Consume (0 no, 1 yes)", 
+            "Has Health Insurance (0 no, 1 yes)", 
+            "Can pay for a Doctor (0 yes, 1 no)", 
+            "General Health Coeffient", 
+            "Mental Health Coeffient", 
+            "Physical Health Coeffient", 
+            "Has difficulty in Walking (0 no, 1 yes)", 
+            "Sex of the patient (0 female, 1 male)", 
+            "Age Coefficent", 
+            "Education Level Coeffient", 
+            "Income Level Coeffient"
+        ]
         self.shap_explainer = None
 
         # Load baseline sample data for SHAP computation
@@ -49,7 +75,7 @@ class DiabetesPredictor:
         abs_shap_values = np.abs(shap_values_patient)
         
         # Sort features and SHAP values by absolute contribution
-        sorted_indices = np.argsort(shap_values_patient)
+        sorted_indices = np.argsort(abs_shap_values)[::-1]
         sorted_features = [self.feature_names[i] for i in sorted_indices]
         sorted_contributions = [abs_shap_values[i] for i in sorted_indices]
 
@@ -59,7 +85,7 @@ class DiabetesPredictor:
         ]
         bad_features = [
             {"feature": sorted_features[i], "contribution": sorted_contributions[i]}
-            for i in range(-1, -4, -1)
+            for i in range(-3, 0)
         ]
 
         result = {
@@ -72,7 +98,7 @@ class DiabetesPredictor:
         return result
 
 
-# Generates a prompt for the GPT model based on the prediction and feature analysis
+# Generates a prompt for the LLM based on the prediction and feature analysis
 def generate_prompt(result, patient_data, feature_names):
     feature_details = "\n".join(
         [f"{name}: {value}" for name, value in zip(feature_names, patient_data)]
@@ -107,17 +133,16 @@ def generate_patient_report(result, patient_data, feature_names):
     prompt = generate_prompt(result, patient_data, feature_names)
 
     # Call the model to generate the report
-    response = ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        logging.error(f"Failed to generate report: {e}")
+        return "Error in generating the report."
 
-    # Stampa o ritorna il report
-    print(response.choices[0].message['content'])
-    return response.choices[0].message['content']
 
-
-'''data_path = '../data/balanced.csv'
+data_path = '../data/balanced.csv'
 
 data = pd.read_csv(data_path)
 random_row = data.sample(n=1, random_state=42)
@@ -126,4 +151,12 @@ patient_data = list(random_row.to_numpy().flatten())
 predictor = DiabetesPredictor()
 
 result = predictor.predict_and_interpret(patient_data)
-print(result)'''
+print(result)
+
+report = generate_patient_report(predictor, result, patient_data)
+print(report)
+
+# Save the report to a file
+with open("patient_report.txt", "w") as file:
+    file.write(report)
+print("Patient report saved to 'patient_report.txt'.")
