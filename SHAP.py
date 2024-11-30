@@ -3,14 +3,13 @@ import pandas as pd
 import shap
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
-import logging
 import google.generativeai as genai
-import os
 
 API_KEY = "AIzaSyAyfAVs9KTJfTdDETLGemhWCcG1MQsqLgY"
+genai.configure(api_key=API_KEY)
 
 class DiabetesPredictor:
-    def __init__(self, model_path="../models/FNN.h5", csv_path='../data/balanced.csv', sample_size=100, feature_names=[]):
+    def __init__(self, model_path="models/FNN.h5", csv_path='data/balanced.csv', sample_size=250, feature_names=[]):
         # Load the Keras model
         try:
             self.model = tf.keras.models.load_model(model_path)
@@ -45,6 +44,7 @@ class DiabetesPredictor:
         # Load baseline sample data for SHAP computation
         try:
             self.baseline_data = self.load_sample_data()
+            print("\nBaseline data loaded successfully")
             self.compute_shap_explainer()
         except  Exception:
             pass
@@ -73,19 +73,20 @@ class DiabetesPredictor:
                 raise ValueError("Model is not loaded properly.")
             if self.baseline_data is None:
                 raise ValueError("Baseline data is not initialized.")
-
+            print("\nInitializing SHAP explainer...\n")
             # Initialize SHAP DeepExplainer
-            self.shap_explainer = shap.DeepExplainer(self.model, self.baseline_data)
-            logging.info("SHAP explainer successfully initialized.")
+            self.shap_explainer = shap.KernelExplainer(lambda x: self.model.predict(x), self.baseline_data)
+            print("\nSHAP explainer successfully initialized")
         except Exception as e:
-            logging.error(f"Failed to initialize SHAP explainer: {e}")
+            print(f"Failed to initialize SHAP explainer: {e}")
             self.shap_explainer = None
 
     def predict_and_interpret(self, patient_data):
         patient_data = self.preprocessing(np.array(patient_data[1:]).reshape((1, -1)))
-
         probability = float(self.model.predict(patient_data)[0][0])
-        shap_values_patient = self.shap_explainer.shap_values(patient_data)[0]
+        patient_data = np.array(patient_data, dtype=np.float32)
+
+        shap_values_patient = np.array(self.shap_explainer(patient_data).values).flatten()
         abs_shap_values = np.abs(shap_values_patient)
 
         # Ensure feature names align with SHAP values
@@ -119,10 +120,13 @@ class DiabetesPredictor:
 
 
 # Generates a prompt for the LLM based on the prediction and feature analysis
-def generate_prompt(result, patient_data, feature_names):
+def generate_prompt(result, patient_data, feature_names, row_index):
     feature_details = "\n".join(
         [f"{name}: {value}" for name, value in zip(feature_names, patient_data)]
     )
+
+    print("\nFeature Details:\n")
+    print(feature_details)
 
     # Extract the top positive and negative features
     good_features = ", ".join(
@@ -134,8 +138,8 @@ def generate_prompt(result, patient_data, feature_names):
 
     # Generate the prompt
     prompt = f"""
-        Patient Analysis Report:
-        - Predicted Probability of being Healthy: {result['prediction']:.2f}
+        Patient Analysis Report from Diabetes Predictor (Patient ID: {row_index}):
+        - Predicted Probability of being Healthy (No Diabete): {1 - result['prediction']:.2f}
         - Average Contribution of Features: {result['average_impact']:.2f}
 
         Key Positive Features (supporting health): {good_features}
@@ -145,12 +149,14 @@ def generate_prompt(result, patient_data, feature_names):
         {feature_details}
 
         Generate a professional report explaining the patient's health condition based on the predicted probability and the feature analysis above. Highlight potential areas of improvement and suggestions for a healthier lifestyle.
+        (do not include date)
     """
     return prompt
 
 # Generates a patient report using the GPT model
-def generate_patient_report(result, patient_data, feature_names):
-    prompt = generate_prompt(result, patient_data, feature_names)
+def generate_patient_report(result, patient_data, feature_names, row_index):
+    patient_data = patient_data[1:]  # Remove the first column (label)
+    prompt = generate_prompt(result, patient_data, feature_names, row_index)
 
     # Call the model to generate the report
     try:
@@ -158,11 +164,11 @@ def generate_patient_report(result, patient_data, feature_names):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        logging.error(f"Failed to generate report: {e}")
+        print(f"Failed to generate report: {e}")
         return "Error in generating the report."
 
 
-data_path = '../data/balanced.csv'
+'''data_path = '../data/balanced.csv'
 
 data = pd.read_csv(data_path)
 random_row = data.sample(n=1, random_state=42)
@@ -173,10 +179,10 @@ predictor = DiabetesPredictor()
 result = predictor.predict_and_interpret(patient_data)
 print(result)
 
-report = generate_patient_report(predictor, result, patient_data)
+report = generate_patient_report(result, patient_data, predictor.get_feature_names())
 print(report)
 
 # Save the report to a file
 with open("patient_report.txt", "w") as file:
     file.write(report)
-print("Patient report saved to 'patient_report.txt'.")
+print("Patient report saved to 'patient_report.txt'.")'''
