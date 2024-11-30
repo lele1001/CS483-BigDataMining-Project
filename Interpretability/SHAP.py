@@ -60,12 +60,26 @@ class DiabetesPredictor:
     def load_sample_data(self):
         # Load data from CSV and select a random sample
         full_data = pd.read_csv(self.csv_path)
-        sample_data = full_data.sample(n=self.sample_size, random_state=42) 
+
+        features_only = full_data.iloc[:, 1:]  # Assuming first column is non-feature
+        sample_data = features_only.sample(n=self.sample_size, random_state=42)
+
+        # sample_data = full_data.sample(n=self.sample_size, random_state=42) 
         return self.preprocessing(sample_data.to_numpy())
 
     def compute_shap_explainer(self):
-        # Initialize the SHAP DeepExplainer with the baseline data
-        self.shap_explainer = shap.DeepExplainer(self.model, self.baseline_data)
+        try:
+            if self.model is None:
+                raise ValueError("Model is not loaded properly.")
+            if self.baseline_data is None:
+                raise ValueError("Baseline data is not initialized.")
+
+            # Initialize SHAP DeepExplainer
+            self.shap_explainer = shap.DeepExplainer(self.model, self.baseline_data)
+            logging.info("SHAP explainer successfully initialized.")
+        except Exception as e:
+            logging.error(f"Failed to initialize SHAP explainer: {e}")
+            self.shap_explainer = None
 
     def predict_and_interpret(self, patient_data):
         patient_data = self.preprocessing(np.array(patient_data[1:]).reshape((1, -1)))
@@ -73,6 +87,12 @@ class DiabetesPredictor:
         probability = float(self.model.predict(patient_data)[0][0])
         shap_values_patient = self.shap_explainer.shap_values(patient_data)[0]
         abs_shap_values = np.abs(shap_values_patient)
+
+        # Ensure feature names align with SHAP values
+        if len(self.feature_names) != abs_shap_values.shape[0]:
+            raise ValueError(
+                f"Mismatch between feature names ({len(self.feature_names)}) and SHAP values ({abs_shap_values.shape[0]})."
+            )
         
         # Sort features and SHAP values by absolute contribution
         sorted_indices = np.argsort(abs_shap_values)[::-1]
