@@ -1,8 +1,13 @@
 from helper import DiabetesPredictor, generate_patient_report
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 data_path = 'data/balanced.csv'
 data = pd.read_csv(data_path)
+numeric_features = ['BMI', 'GenHlth', 'MentHlth', 'PhysHlth', 'Age', 'Education', 'Income']
+scaler = MinMaxScaler()
+data.loc[:, numeric_features] = scaler.fit_transform(data[numeric_features])
+
 predictor = DiabetesPredictor()
 
 print("\n\nWelcome to the Patient Health Analysis System\n")

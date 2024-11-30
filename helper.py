@@ -2,17 +2,17 @@ import numpy as np
 import pandas as pd
 import shap
 import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
 import google.generativeai as genai
 
 API_KEY = "AIzaSyAyfAVs9KTJfTdDETLGemhWCcG1MQsqLgY"
 genai.configure(api_key=API_KEY)
 
 class DiabetesPredictor:
-    def __init__(self, model_path="models/NN_5050.h5", csv_path='data/balanced.csv', sample_size=250, feature_names=[]):
+    def __init__(self, model_path="models/NN_5050.h5", weights_path="models/NN_5050.h5", csv_path='data/balanced.csv', sample_size=250, feature_names=[]):
         # Load the Keras model
         try:
             self.model = tf.keras.models.load_model(model_path)
+            self.model.load_weights(weights_path)
         except Exception:
             raise ValueError(f"Failed to load model from path: {model_path}")
         self.csv_path = csv_path
@@ -52,25 +52,6 @@ class DiabetesPredictor:
 
     def get_feature_names(self):
         return self.feature_names
-    
-    def preprocessing(self, data):
-        scaler = MinMaxScaler()
-
-        columns_to_scale = [
-            "Body Mass Index", 
-            "General Health Coeffient", 
-            "Mental Health Coeffient (how many days was bad in last month)", 
-            "Physical Health Coeffient (how many days was bad in last month)", 
-            "Age Coefficent", 
-            "Education Level Coeffient", 
-            "Income Level Coeffient"
-        ]
-        columns_to_scale_indices = [self.feature_names.index(col) for col in columns_to_scale]
-
-        # Scale only the selected columns
-        data[:, columns_to_scale_indices] = scaler.fit_transform(data[:, columns_to_scale_indices])
-        scaled_data = scaler.fit_transform(data)
-        return scaled_data
 
     def load_sample_data(self):
         # Load data from CSV and select a random sample
@@ -80,7 +61,7 @@ class DiabetesPredictor:
         sample_data = features_only.sample(n=self.sample_size, random_state=42)
 
         # sample_data = full_data.sample(n=self.sample_size, random_state=42) 
-        return self.preprocessing(sample_data.to_numpy())
+        return sample_data.to_numpy()
 
     def compute_shap_explainer(self):
         try:
@@ -97,10 +78,9 @@ class DiabetesPredictor:
             self.shap_explainer = None
 
     def predict_and_interpret(self, patient_data):
-        patient_data = self.preprocessing(np.array(patient_data[1:]).reshape((1, -1)))
+        patient_data = np.array(patient_data[1:], dtype=np.float32).reshape((1, -1))
         probability = 1 - float(self.model.predict(patient_data)[0][0])
-        print(f"Predicted probability: {probability}")
-        patient_data = np.array(patient_data, dtype=np.float32)
+        print(f"Predicted probability of being healty: {probability}")
 
         shap_values_patient = np.array(self.shap_explainer(patient_data).values).flatten()
         abs_shap_values = np.abs(shap_values_patient)
@@ -138,7 +118,7 @@ class DiabetesPredictor:
 # Generates a prompt for the LLM based on the prediction and feature analysis
 def generate_prompt(result, patient_data, feature_names, row_index):
     feature_details = "\n".join(
-        [f"{name}: {value}" for name, value in zip(feature_names, patient_data)]
+        [f"{name}: {np.round(value, 2)}" for name, value in zip(feature_names, patient_data)]
     )
 
     print("\nFeature Details:\n")
