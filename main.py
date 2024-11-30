@@ -1,11 +1,13 @@
-from SHAP import DiabetesPredictor, generate_patient_report
+from helper import DiabetesPredictor, generate_patient_report
 import pandas as pd
 
 data_path = 'data/balanced.csv'
 data = pd.read_csv(data_path)
 predictor = DiabetesPredictor()
 
-print("\n\nWelcome to the Patient Health Analysis System!\n")
+print("\n\nWelcome to the Patient Health Analysis System\n")
+print("This system generates a professional report for a patient based on the Diabetes Predictor model\n")
+print("Startring the system...\n\n\n")
 
 while True:
     random_row = data.sample(n=1)

@@ -9,19 +9,20 @@ API_KEY = "AIzaSyAyfAVs9KTJfTdDETLGemhWCcG1MQsqLgY"
 genai.configure(api_key=API_KEY)
 
 class DiabetesPredictor:
-    def __init__(self, model_path="models/FNN.h5", csv_path='data/balanced.csv', sample_size=250, feature_names=[]):
+    def __init__(self, model_path="models/NN_5050.h5", csv_path='data/balanced.csv', sample_size=250, feature_names=[]):
         # Load the Keras model
         try:
             self.model = tf.keras.models.load_model(model_path)
         except Exception:
-            pass
+            raise ValueError(f"Failed to load model from path: {model_path}")
         self.csv_path = csv_path
         self.sample_size = sample_size
         self.feature_names = [
             "Has High Blood Pressure (0 no, 1 yes)", 
             "Has High Cholesterole (0 no, 1 yes)", 
             "Does Cholesterole Check (0 no, 1 yes)", 
-            "Body Mass Index", "Is a Smoker (0 no, 1 yes)", 
+            "Body Mass Index", 
+            "Is a Smoker (0 no, 1 yes)", 
             "Had a Stroke (0 no, 1 yes)", 
             "Has an Heart Disease (0 no, 1 yes)", 
             "Does Physical Activity (0 no, 1 yes)", 
@@ -31,8 +32,8 @@ class DiabetesPredictor:
             "Has Health Insurance (0 no, 1 yes)", 
             "Can pay for a Doctor (0 yes, 1 no)", 
             "General Health Coeffient", 
-            "Mental Health Coeffient", 
-            "Physical Health Coeffient", 
+            "Mental Health Coeffient (how many days was bad in last month)", 
+            "Physical Health Coeffient (how many days was bad in last month)", 
             "Has difficulty in Walking (0 no, 1 yes)", 
             "Sex of the patient (0 female, 1 male)", 
             "Age Coefficent", 
@@ -44,16 +45,30 @@ class DiabetesPredictor:
         # Load baseline sample data for SHAP computation
         try:
             self.baseline_data = self.load_sample_data()
-            print("\nBaseline data loaded successfully")
+            print("\n\n\nBaseline data loaded successfully")
             self.compute_shap_explainer()
-        except  Exception:
-            pass
+        except Exception:
+            raise ValueError("Failed to load baseline data for SHAP computation")
 
     def get_feature_names(self):
         return self.feature_names
     
     def preprocessing(self, data):
         scaler = MinMaxScaler()
+
+        columns_to_scale = [
+            "Body Mass Index", 
+            "General Health Coeffient", 
+            "Mental Health Coeffient (how many days was bad in last month)", 
+            "Physical Health Coeffient (how many days was bad in last month)", 
+            "Age Coefficent", 
+            "Education Level Coeffient", 
+            "Income Level Coeffient"
+        ]
+        columns_to_scale_indices = [self.feature_names.index(col) for col in columns_to_scale]
+
+        # Scale only the selected columns
+        data[:, columns_to_scale_indices] = scaler.fit_transform(data[:, columns_to_scale_indices])
         scaled_data = scaler.fit_transform(data)
         return scaled_data
 
@@ -83,7 +98,8 @@ class DiabetesPredictor:
 
     def predict_and_interpret(self, patient_data):
         patient_data = self.preprocessing(np.array(patient_data[1:]).reshape((1, -1)))
-        probability = float(self.model.predict(patient_data)[0][0])
+        probability = 1 - float(self.model.predict(patient_data)[0][0])
+        print(f"Predicted probability: {probability}")
         patient_data = np.array(patient_data, dtype=np.float32)
 
         shap_values_patient = np.array(self.shap_explainer(patient_data).values).flatten()
@@ -139,7 +155,7 @@ def generate_prompt(result, patient_data, feature_names, row_index):
     # Generate the prompt
     prompt = f"""
         Patient Analysis Report from Diabetes Predictor (Patient ID: {row_index}):
-        - Predicted Probability of being Healthy (No Diabete): {1 - result['prediction']:.2f}
+        - Predicted Probability of being Healthy (No Diabete): {result['prediction']:.2f}
         - Average Contribution of Features: {result['average_impact']:.2f}
 
         Key Positive Features (supporting health): {good_features}
@@ -149,7 +165,7 @@ def generate_prompt(result, patient_data, feature_names, row_index):
         {feature_details}
 
         Generate a professional report explaining the patient's health condition based on the predicted probability and the feature analysis above. Highlight potential areas of improvement and suggestions for a healthier lifestyle.
-        (do not include date)
+        (do not include date, just text no markdown or latex)
     """
     return prompt
 
