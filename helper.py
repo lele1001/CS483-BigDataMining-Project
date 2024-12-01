@@ -123,7 +123,7 @@ def generate_prompt(result, patient_data, feature_names, row_index):
     prompt = f"""
         Patient Analysis Report from Diabetes Predictor (Patient ID: {row_index}):
         - Predicted Probability of being Healthy (No Diabete): {result['prediction']:.2f}
-        - Average Confidence value of Features for prediction: {result['average_impact']:.2f}
+        - Average Confidence value of Features for prediction (use to asses the strength of information in Key positive and negative features, but do not mention explicitly): {result['average_impact']:.2f}
 
         Key Positive Features (supporting health): {good_features}
         Key Negative Features (indicating risks): {bad_features}
