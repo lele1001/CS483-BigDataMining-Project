@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import shap
 import tensorflow as tf
 import google.generativeai as genai
@@ -8,20 +7,18 @@ API_KEY = "AIzaSyAyfAVs9KTJfTdDETLGemhWCcG1MQsqLgY"
 genai.configure(api_key=API_KEY)
 
 class DiabetesPredictor:
-    def __init__(self, model_path="models/NN_5050.h5", weights_path="models/NN_5050.h5", csv_path='data/balanced.csv', sample_size=250, feature_names=[]):
+    def __init__(self, baseline_data, model_path="models/NN_5050.h5", weights_path="models/NN_5050.h5", feature_names=[]):
         # Load the Keras model
         try:
             self.model = tf.keras.models.load_model(model_path)
             self.model.load_weights(weights_path)
         except Exception:
             raise ValueError(f"Failed to load model from path: {model_path}")
-        self.csv_path = csv_path
-        self.sample_size = sample_size
         self.feature_names = [
             "Has High Blood Pressure (0 no, 1 yes)", 
             "Has High Cholesterole (0 no, 1 yes)", 
             "Does Cholesterole Check (0 no, 1 yes)", 
-            "Body Mass Index", 
+            "Body Mass Index (scale from 0 to 1)", 
             "Is a Smoker (0 no, 1 yes)", 
             "Had a Stroke (0 no, 1 yes)", 
             "Has an Heart Disease (0 no, 1 yes)", 
@@ -31,20 +28,20 @@ class DiabetesPredictor:
             "High Alchol Consume (0 no, 1 yes)", 
             "Has Health Insurance (0 no, 1 yes)", 
             "Can pay for a Doctor (0 yes, 1 no)", 
-            "General Health Coeffient", 
-            "Mental Health Coeffient (how many days was bad in last month)", 
-            "Physical Health Coeffient (how many days was bad in last month)", 
+            "General Health Coeffient (represent a scale from 0 to 1, the lower the better)", 
+            "Mental Health Coeffient (represent how many days was bad in last month, scaled between 0 and 1)", 
+            "Physical Health Coeffient (represent how many days was bad in last month, scaled between 0 and 1)", 
             "Has difficulty in Walking (0 no, 1 yes)", 
             "Sex of the patient (0 female, 1 male)", 
-            "Age Coefficent", 
-            "Education Level Coeffient", 
-            "Income Level Coeffient"
+            "Age Coefficent (scale from 0 to 1)", 
+            "Education Level Coeffient (scale from 0 to 1)", 
+            "Income Level Coeffient (scale from 0 to 1)"
         ]
         self.shap_explainer = None
 
         # Load baseline sample data for SHAP computation
         try:
-            self.baseline_data = self.load_sample_data()
+            self.baseline_data = baseline_data.iloc[:, 1:]
             print("\n\n\nBaseline data loaded successfully")
             self.compute_shap_explainer()
         except Exception:
@@ -52,16 +49,6 @@ class DiabetesPredictor:
 
     def get_feature_names(self):
         return self.feature_names
-
-    def load_sample_data(self):
-        # Load data from CSV and select a random sample
-        full_data = pd.read_csv(self.csv_path)
-
-        features_only = full_data.iloc[:, 1:]  # Assuming first column is non-feature
-        sample_data = features_only.sample(n=self.sample_size, random_state=42)
-
-        # sample_data = full_data.sample(n=self.sample_size, random_state=42) 
-        return sample_data.to_numpy()
 
     def compute_shap_explainer(self):
         try:
@@ -92,7 +79,7 @@ class DiabetesPredictor:
             )
         
         # Sort features and SHAP values by absolute contribution
-        sorted_indices = np.argsort(abs_shap_values)[::-1]
+        sorted_indices = np.argsort(shap_values_patient)
         sorted_features = [self.feature_names[i] for i in sorted_indices]
         sorted_contributions = [abs_shap_values[i] for i in sorted_indices]
 
@@ -126,26 +113,26 @@ def generate_prompt(result, patient_data, feature_names, row_index):
 
     # Extract the top positive and negative features
     good_features = ", ".join(
-        [f"{item['feature']} ({item['contribution']:.2f})" for item in result["good_features"]]
+        [f"{item['feature']} has a confidence value of ({item['contribution']:.2f})" for item in result["good_features"]]
     )
     bad_features = ", ".join(
-        [f"{item['feature']} ({item['contribution']:.2f})" for item in result["bad_features"]]
+        [f"{item['feature']} has a confidence value of ({item['contribution']:.2f})" for item in result["bad_features"]]
     )
 
     # Generate the prompt
     prompt = f"""
         Patient Analysis Report from Diabetes Predictor (Patient ID: {row_index}):
         - Predicted Probability of being Healthy (No Diabete): {result['prediction']:.2f}
-        - Average Contribution of Features: {result['average_impact']:.2f}
+        - Average Confidence value of Features for prediction: {result['average_impact']:.2f}
 
         Key Positive Features (supporting health): {good_features}
         Key Negative Features (indicating risks): {bad_features}
 
-        Detailed Feature Values:
+        Detailed Feature Values (all between 0 and 1):
         {feature_details}
 
         Generate a professional report explaining the patient's health condition based on the predicted probability and the feature analysis above. Highlight potential areas of improvement and suggestions for a healthier lifestyle.
-        (do not include date, just text no markdown or latex)
+        (do not include date, just text no markdown or latex. rank the recommendations based on the feature confidence, but do not include the confidence values in the report)
     """
     return prompt
 
