@@ -28,9 +28,9 @@ class DiabetesPredictor:
             "High Alchol Consume (0 no, 1 yes)", 
             "Has Health Insurance (0 no, 1 yes)", 
             "Can pay for a Doctor (0 yes, 1 no)", 
-            "General Health Coeffient (represent a scale from 0 to 1, the lower the better)", 
-            "Mental Health Coeffient (represent how many days was bad in last month, scaled between 0 and 1)", 
-            "Physical Health Coeffient (represent how many days was bad in last month, scaled between 0 and 1)", 
+            "General Health Fragility Coeffient (represent a scale from 0 to 1, the lower the better)", 
+            "Mental Health Fragility Coeffient (represent how many days was bad in last month, scaled between 0 and 1)", 
+            "Physical Health Fragility Coeffient (represent how many days was bad in last month, scaled between 0 and 1)", 
             "Has difficulty in Walking (0 no, 1 yes)", 
             "Sex of the patient (0 female, 1 male)", 
             "Age Coefficent (scale from 0 to 1)", 
@@ -105,7 +105,7 @@ class DiabetesPredictor:
 # Generates a prompt for the LLM based on the prediction and feature analysis
 def generate_prompt(result, patient_data, feature_names, row_index):
     feature_details = "\n".join(
-        [f"{name}: {np.round(value, 2)}" for name, value in zip(feature_names, patient_data)]
+        [f"{name}: {np.round(value, 2)}" if ("yes" not in name and "Sex" not in name) else f"{name}: {int(value)}" for name, value in zip(feature_names, patient_data)]
     )
 
     print("\nFeature Details:\n")
