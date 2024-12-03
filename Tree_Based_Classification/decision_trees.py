@@ -41,28 +41,6 @@ def get_best(metrics_1, metrics_2):
             if np.dot(weights, metrics_1) > np.dot(weights, metrics_2) \
             else metrics_2
 
-'''def manage_single_result(result, path, draw=True):
-    # Compute acuracy
-    count_misclassified = (result['y_test'] != result['y_pred']).sum()
-    count_correct = (result['y_test'] == result['y_pred']).sum()
-    test_accuracy = count_correct / len(result['y_test'])
-
-    class_report = classification_report(result['y_test'], result['y_pred'], output_dict=True)
-    metrics = get_metrics(class_report)
-    if draw:
-        # Plot confusion matrix
-        cm = confusion_matrix(result['y_test'], result['y_pred'])
-        sns.heatmap(cm, annot=True, fmt='d')
-        plt.title('Confusion Matrix')
-        plt.xlabel('Predicted')
-        plt.ylabel('True')
-        os.makedirs(path, exist_ok=True)
-        plt.savefig(f"{path}/confusion_matrix.png")
-
-        plt.clf()
-
-    return metrics, test_accuracy, result['setting_code'], len(result['doubted_rows'])
-'''
 
 def manage_single_result(result, path, draw=True):
     # Compute accuracy
@@ -92,7 +70,7 @@ def manage_single_result(result, path, draw=True):
         text = "\n".join([
             f"Recall: {metrics[0]:.2f}",
             f"F1-Score: {metrics[1]:.2f}",
-            f"Precision: {metrics[2]:.2f}",
+            f"Precision: {metrics[2]:.2f}',
             f"Accuracy: {metrics[3]:.2f}"
         ])
         ax1.text(0, 0.5, text, fontsize=10, verticalalignment='center', horizontalalignment='left')
@@ -108,29 +86,6 @@ def manage_single_result(result, path, draw=True):
 
     return metrics, test_accuracy, result['setting_code'], len(result['doubted_rows'])
 
-'''
-def aggregate_results_old(results, path):
-    # Take all the settings, sort them by decreasing delta and plot test accuracy
-    # wrt the delta
-
-    test_accuracies = []
-    deltas = []
-    doubts = []
-    for result in results.values():
-        test_accuracy, setting_code, doubts = manage_single_result(result, path)
-        test_accuracies.append(test_accuracy)
-        deltas.append(result['delta'])
-        doubts.append(doubts)
-
-    # Plot test accuracy wrt delta
-    plt.scatter(deltas, test_accuracies)
-    plt.xlabel('[DT] - Time to train (s)')
-    plt.ylabel('[DT] - Test accuracy')
-    plt.title('[DT] - Test accuracy wrt time to train')
-    plt.savefig(f"{path}/test_accuracy_vs_time.png")
-
-    plt.clf()
-'''
 
 def aggregate_results(results, path):
     test_accuracies = []
