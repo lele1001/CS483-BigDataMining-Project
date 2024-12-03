@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.tree import plot_tree
 import seaborn as sns
+from matplotlib.gridspec import GridSpec
 import os
 import time
 import json
@@ -15,12 +16,39 @@ dt_setting_keys = ['setting_code', 'max_depth', 'max_features', 'random_state']
 def read_data(file_name):
     return pd.read_csv(file_name)
 
-def manage_single_result(result, path, draw=True):
+def get_metrics(class_report):
+    weighted_avg = class_report['weighted avg']
+    accuracy = class_report['accuracy']
+    metrics = (weighted_avg['precision'], weighted_avg['recall'], weighted_avg['f1-score'], accuracy) 
+    return metrics
+
+def get_best(metrics_1, metrics_2):
+    ac1, re1, pr1, f1_1 = metrics_1
+    ac2, re2, pr2, f1_2 = metrics_2
+
+    # trivial cases
+    if all([ac1 >= ac2, re1 >= re2, pr1 >= pr2, f1_1 >= f1_2]):
+        return metrics_1
+    elif all([ac1 <= ac2, re1 <= re2, pr1 <= pr2, f1_1 <= f1_2]):
+        return metrics_2
+    # othereise, solve linear optimization problem giving highest weight to 
+    # recall, then f1, then precision and finally accuracy
+    else:
+        weights = [0.4, 0.3, 0.2, 0.1]
+        metrics_1 = [re1, f1_1, pr1, ac1]
+        metrics_2 = [re2, f1_2, pr2, ac2]
+        return metrics_1 \
+            if np.dot(weights, metrics_1) > np.dot(weights, metrics_2) \
+            else metrics_2
+
+'''def manage_single_result(result, path, draw=True):
     # Compute acuracy
     count_misclassified = (result['y_test'] != result['y_pred']).sum()
     count_correct = (result['y_test'] == result['y_pred']).sum()
     test_accuracy = count_correct / len(result['y_test'])
 
+    class_report = classification_report(result['y_test'], result['y_pred'], output_dict=True)
+    metrics = get_metrics(class_report)
     if draw:
         # Plot confusion matrix
         cm = confusion_matrix(result['y_test'], result['y_pred'])
@@ -33,7 +61,52 @@ def manage_single_result(result, path, draw=True):
 
         plt.clf()
 
-    return test_accuracy, result['setting_code'], len(result['doubted_rows'])
+    return metrics, test_accuracy, result['setting_code'], len(result['doubted_rows'])
+'''
+
+def manage_single_result(result, path, draw=True):
+    # Compute accuracy
+    count_misclassified = (result['y_test'] != result['y_pred']).sum()
+    count_correct = (result['y_test'] == result['y_pred']).sum()
+    test_accuracy = count_correct / len(result['y_test'])
+    
+    class_report = classification_report(result['y_test'], result['y_pred'], output_dict=True)
+    metrics = get_metrics(class_report)
+    
+    if draw:
+        # Set up the figure layout
+        fig = plt.figure(figsize=(10, 5))
+        gs = GridSpec(1, 2, width_ratios=[3, 1])  # 3:1 ratio for matrix and text box
+        
+        # Plot confusion matrix
+        cm = confusion_matrix(result['y_test'], result['y_pred'])
+        ax0 = fig.add_subplot(gs[0, 0])
+        sns.heatmap(cm, annot=True, fmt='d', ax=ax0, cbar=False)
+        ax0.set_title('Confusion Matrix')
+        ax0.set_xlabel('Predicted')
+        ax0.set_ylabel('True')
+        
+        # Add text box
+        ax1 = fig.add_subplot(gs[0, 1])
+        ax1.axis('off')  # Hide axes for the text box
+        text = "\n".join([
+            f"Recall: {metrics[0]:.2f}",
+            f"F1-Score: {metrics[1]:.2f}",
+            f"Precision: {metrics[2]:.2f}",
+            f"Accuracy: {metrics[3]:.2f}"
+        ])
+        ax1.text(0, 0.5, text, fontsize=10, verticalalignment='center', horizontalalignment='left')
+        
+        # add legend to the plot (colorbar for the confusion matrix)
+        plt.colorbar(ax0.get_children()[0], ax=ax0)
+
+        # Save the figure
+        os.makedirs(path, exist_ok=True)
+        plt.savefig(f"{path}/confusion_matrix_with_text.png")
+        plt.clf()
+    
+
+    return metrics, test_accuracy, result['setting_code'], len(result['doubted_rows'])
 
 '''
 def aggregate_results_old(results, path):
@@ -64,11 +137,13 @@ def aggregate_results(results, path):
     deltas = []
     doubts = []
     setting_codes = []
+    test_metrics = []
 
     for result in results.values():
-        test_accuracy, setting_code, doubt = manage_single_result(result, path, \
+        metrics, test_accuracy, setting_code, doubt = manage_single_result(result, path, \
                                                                   draw=False)
         test_accuracies.append(test_accuracy)
+        test_metrics.append(metrics)
         deltas.append(result['delta'])
         doubts.append(doubt)
         setting_codes.append(setting_code)
@@ -123,6 +198,7 @@ def aggregate_results(results, path):
 
 
 
+
 def generate_plots(results, json_path = "./settings/dt_settings.json", \
                     path = "./graphs"):
     '''
@@ -142,16 +218,23 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
     best_test_accuracy_setting = None
     min_number_doubts = 1e9
     best_doubts_setting = None
+    best_metrics = (0, 0, 0, 0)
+    best_metrics_setting = None
 
     for result in results.values():
         full_path = os.path.join(path, f"setting_{result['setting_code']}")
         t = manage_single_result(result, full_path)
-        if t[0] > max_test_accuracy:
-            max_test_accuracy = t[0]
-            best_test_accuracy_setting = t[1]
-        if t[2] < min_number_doubts:
-            min_number_doubts = t[2]
-            best_doubts_setting = t[1]
+        best_metrics_old = best_metrics
+        best_metrics = get_best(best_metrics, t[0])
+        if best_metrics != best_metrics_old:
+            best_metrics_setting = t[2]
+        if t[1] > max_test_accuracy:
+            max_test_accuracy = t[1]
+            best_test_accuracy_setting = t[2]
+        if t[3] < min_number_doubts:
+            min_number_doubts = t[3]
+            best_doubts_setting = t[2]
+
 
     with open(json_path, "r") as file:
         settings = json.load(file)
@@ -165,6 +248,12 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
     print(settings[f"setting_{best_doubts_setting}"])
     print(f"[DT] - For this setting, the top 5feature importances are:")
     print(results[best_doubts_setting]['feature_importances'][:5])
+
+    print(f"[DT] - Best metrics: {best_metrics}, obtained for setting {best_metrics_setting}, which is:")
+    print(settings[f"setting_{best_metrics_setting}"])
+    print(f"[DT] - For this setting, the top 5 feature importances are:")
+    print(results[best_metrics_setting]['feature_importances'][:5])
+    
     print("="*80+"\n")
     #os.makedirs(os.path.join(path, "DT_best_settings.txt"), exist_ok=True)
     with open(f"{path}/DT_best_settings.txt", "w") as file:
@@ -187,7 +276,26 @@ def generate_plots(results, json_path = "./settings/dt_settings.json", \
         file.write(f"\nFor this setting, the feature importances are:\n")
         file.write(results[best_doubts_setting]['feature_importances'].to_string())
 
+        file.write(f"\nBest metrics: {best_metrics}, obtained for setting {best_metrics_setting}, which is:\n")
+        file.write(json.dumps(settings[f"setting_{best_metrics_setting}"], indent=4))
+        file.write(f"Which corresponds to:\n")
+        build_temp_dict = {dt_setting_keys[i]:\
+                            settings[f"setting_{best_metrics_setting}"][i] for i in range(len(dt_setting_keys))}
+        file.write(json.dumps(build_temp_dict, indent=4))
+        file.write(f"\nFor this setting, the feature importances are:\n")
+        file.write(results[best_metrics_setting]['feature_importances'].to_string())
+
+
     aggregate_results(results, path)
+
+    #plot the tree for the best setting
+    result = results[best_metrics_setting]
+    fig = plt.figure(figsize=(100,90))
+    plot_tree(result['classifier'], filled=True, feature_names=result['X_test'].columns, class_names=['0', '1', '2'])
+    # add legend
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
+    plt.savefig(f"{path}/best_tree.pdf", format="pdf")
+    plt.clf()
     return best_test_accuracy_setting
 
 
