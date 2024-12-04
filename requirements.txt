@@ -1,0 +1,24 @@
+# Essential libraries for data processing and machine learning
+pandas==1.5.3
+numpy==1.23.5
+scikit-learn==1.2.1
+matplotlib==3.7.0
+seaborn==0.12.2
+
+# Libraries for neural networks
+tensorflow==2.11.0
+
+# SHAP for interpretability
+shap==0.41.0
+
+# Libraries for clustering and dimensionality reduction
+scipy==1.9.3
+umap-learn==0.5.3
+
+# Libraries for working with generative AI models
+openai==0.27.0  # If you're using OpenAI API for LLM
+google-generativeai==0.4.0  # Google Generative AI API
+
+# Other useful libraries for general tasks
+joblib==1.2.0  # For saving and loading models
+python-dotenv==0.21.0  # For handling environment variables securely

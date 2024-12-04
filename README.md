@@ -63,18 +63,16 @@ The dataset includes 21 features, such as BMI, physical activity, cholesterol le
 
 ## Usage 
 
-1. **Preprocess the Dataset:** clean and prepare the data for modeling
+1. **Generate API key**: visit [Google AI Studio](https://aistudio.google.com/apikey) to generate your key and paste it in line 6 of ```helper.py```
+2. **Run the Project:** use the main entry script to create personalized reports with the LLM tool
     ```
-    python preprocess.py
+    python main.py
     ```
-2. Run Models: execute the scripts for different analyses:
-    - Dimensionality Reduction: ```python dimensionality_reduction.py```
-    - Clustering: ```python clustering.py```
-    - Classification: ```python classification.py```
-3. Generate Reports: create personalized reports with the LLM tool
-    ```
-    python generate_reports.py
-    ```
+3. **Explore Individual Modules:** execute the scripts for different analyses
+    - Dimensionality Reduction:
+    - Clustering: ```python k_means/kmeans.py```
+    - Classification: ```python tree_based_classification/main.py```
+    - Neural Networks: 
 
 ---
 
