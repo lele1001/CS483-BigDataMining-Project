@@ -3,7 +3,7 @@ import shap
 import tensorflow as tf
 import google.generativeai as genai
 
-API_KEY = "AIzaSyAyfAVs9KTJfTdDETLGemhWCcG1MQsqLgY"
+API_KEY = "your_api_key"
 genai.configure(api_key=API_KEY)
 
 class DiabetesPredictor:
