@@ -53,19 +53,28 @@ The dataset includes 21 features, such as BMI, physical activity, cholesterol le
    git clone <repository-url>
    cd <repository-directory>
    ```
-2. Install the dependencies: ```pip install -r requirements.txt```
+2. Install the dependencies: 
+    ```
+    pip install -r requirements.txt
+    ```
 3. Download and place the datase in the ```data/``` directory (if not already present)
 
 ---
 
 ## Usage 
 
-1. Preprocess the Dataset: run ```python preprocess.py``` to clean and prepare the data for modeling
+1. **Preprocess the Dataset:** clean and prepare the data for modeling
+    ```
+    python preprocess.py
+    ```
 2. Run Models: execute the scripts for different analyses:
     - Dimensionality Reduction: ```python dimensionality_reduction.py```
     - Clustering: ```python clustering.py```
     - Classification: ```python classification.py```
-3. Generate Reports: run ```python generate_reports.py``` to create personalized reports with the LLM
+3. Generate Reports: create personalized reports with the LLM tool
+    ```
+    python generate_reports.py
+    ```
 
 ---
 
