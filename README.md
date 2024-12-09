@@ -80,7 +80,7 @@ The dataset includes 21 features, such as BMI, physical activity, cholesterol le
 
 - **Model Performance:** Achieved ~85% accuracy for diabetes classification using neural networks.
 - **Key Findings:** Physical health, BMI, and age were the most influential features for diabetes prediction.
-**Reports:** Patient-specific recommendations were successfully generated using LLMs.
+- **Reports:** Patient-specific recommendations were successfully generated using LLMs.
 
 ---
 
